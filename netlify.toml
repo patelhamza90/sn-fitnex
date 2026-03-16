@@ -1,0 +1,48 @@
+# ============================================================
+#  SN.Fitness — Netlify Deployment Configuration
+# ============================================================
+
+[build]
+  publish = "."   # deploy from root folder (where index.html lives)
+
+# ── Cache headers ────────────────────────────────────────────
+# HTML: never cache so auth redirects always work correctly
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+
+# JS files: short cache with revalidation
+[[headers]]
+  for = "/js/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+# CSS: short cache with revalidation
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+# Images: 7 day cache
+[[headers]]
+  for = "/*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# ── Security + permissive headers for Firebase + Cloudinary ──
+# NOTE: Content-Security-Policy is intentionally relaxed here.
+# Firebase SDK requires 'unsafe-eval' in some environments.
+# Source maps (.map files) require gstatic.com in connect-src.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;"

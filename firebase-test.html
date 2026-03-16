@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SN.Fitnex — Firebase Connection Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      padding: 24px 16px;
+      color: #1e293b;
+    }
+
+    .wrap {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .test {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13.5px;
+    }
+
+    .test:last-child {
+      border-bottom: none;
+    }
+
+    .icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.3;
+    }
+
+    .detail {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+      word-break: break-all;
+    }
+
+    .pending {
+      color: #94a3b8;
+    }
+
+    .ok {
+      color: #16a34a;
+    }
+
+    .fail {
+      color: #dc2626;
+    }
+
+    .warn {
+      color: #d97706;
+    }
+
+    .fix {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: #991b1b;
+      line-height: 1.6;
+    }
+
+    .fix strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 12px;
+      overflow-x: auto;
+      margin: 10px 0;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 38px;
+      padding: 0 18px;
+      background: #4361ee;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+
+    .btn:hover {
+      background: #3652d4;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-ok {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .badge-fail {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .badge-pend {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    #summary {
+      font-size: 14px;
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .summary-ok {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .summary-fail {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>🔍 Firebase Connection Test</h1>
+    <p class="sub">Diagnosing why attendance.html shows "connection error"</p>
+
+    <div class="card">
+      <h2>📋 Test Results</h2>
+      <div class="test" id="t-config">
+        <span class="icon pending">⏳</span>
+        <div>
+          <div class="label">Firebase Config</div>
+          <div class="detail" id="t-config-detail">Checking credentials...</div>
+        </div>
+      </div>
+      <div class="test" id="t-init">
+        <span class="icon pending">⏳</span>
+        <div>
+          <div class="label">Firebase Init</div>
+          <div class="detail" id="t-init-detail">Waiting...</div>
+        </div>
+      </div>
+      <div class="test" id="t-read">
+        <span class="icon pending">⏳</span>
+        <div>
+          <div class="label">Firestore Read (members collection)</div>
+          <div class="detail" id="t-read-detail">Waiting...</div>
+        </div>
+      </div>
+      <div class="test" id="t-write">
+        <span class="icon pending">⏳</span>
+        <div>
+          <div class="label">Firestore Write (attendance collection)</div>
+          <div class="detail" id="t-write-detail">Waiting...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="fix-section"></div>
+    <div id="summary"></div>
+
+    <button class="btn" onclick="runTests()">🔄 Run Tests Again</button>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    // ── UI helpers ──────────────────────────────────────────
+    function setTest(id, iconCls, icon, detail, extraHTML) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.querySelector('.icon').className = 'icon ' + iconCls;
+      el.querySelector('.icon').textContent = icon;
+      el.querySelector('.detail').textContent = detail;
+      if (extraHTML) {
+        var fix = document.createElement('div');
+        fix.innerHTML = extraHTML;
+        el.querySelector('.detail').after(fix);
+      }
+    }
+
+    // ── Main test runner ────────────────────────────────────
+    function runTests() {
+      // Reset
+      document.getElementById('fix-section').innerHTML = '';
+      document.getElementById('summary').innerHTML = '';
+      ['t-config', 't-init', 't-read', 't-write'].forEach(function (id) {
+        setTest(id, 'pending', '⏳', 'Running...');
+        // remove any old fix divs
+        var el = document.getElementById(id);
+        var old = el.querySelectorAll('.fix');
+        old.forEach(function (n) { n.remove(); });
+      });
+
+      var failures = [];
+
+      // ── Test 1: Config sanity ──────────────────────────────
+      var cfg = (typeof firebaseConfig !== 'undefined') ? firebaseConfig : null;
+      if (!cfg) {
+        setTest('t-config', 'fail', '❌', 'firebaseConfig variable not found — firebase-config.js failed to load');
+        failures.push('config');
+        showSummary(failures);
+        return;
+      }
+      var isPlaceholder = cfg.apiKey === 'YOUR_API_KEY' || !cfg.apiKey || !cfg.projectId;
+      if (isPlaceholder) {
+        setTest('t-config', 'fail', '❌',
+          'PLACEHOLDER VALUES DETECTED — you have not replaced the config yet',
+          '<div class="fix"><strong>How to fix:</strong>' +
+          '1. Go to <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a><br>' +
+          '2. Project Settings → Your apps → Web app (&lt;/&gt;)<br>' +
+          '3. Copy the firebaseConfig object<br>' +
+          '4. Paste into <code>js/firebase-config.js</code> replacing the placeholder values</div>'
+        );
+        failures.push('config');
+        showSummary(failures);
+        return;
+      }
+      setTest('t-config', 'ok', '✅', 'Config looks real — projectId: ' + cfg.projectId);
+
+      // ── Test 2: Firebase init ──────────────────────────────
+      if (!window.db) {
+        setTest('t-init', 'fail', '❌', 'window.db is null — Firebase did not initialize');
+        failures.push('init');
+        showSummary(failures);
+        return;
+      }
+      setTest('t-init', 'ok', '✅', 'Firebase initialized — window.db is ready');
+
+      // ── Test 3: Firestore read (public) ────────────────────
+      window.db.collection('members').limit(1).get()
+        .then(function () {
+          setTest('t-read', 'ok', '✅', 'Firestore read: ALLOWED ✓ — public can read members');
+          return runWriteTest();
+        })
+        .catch(function (err) {
+          failures.push('read');
+          if (err.code === 'permission-denied') {
+            setTest('t-read', 'fail', '❌',
+              'PERMISSION DENIED — Firestore rules are blocking public reads on members',
+              '<div class="fix"><strong>⚠️ This is your problem. Fix it now:</strong>' +
+              '<br>1. Open <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a>' +
+              '<br>2. Select your project → Firestore Database → Rules tab' +
+              '<br>3. Replace ALL existing rules with the rules shown below' +
+              '<br>4. Click <strong>Publish</strong>' +
+              '<br><br>Copy these rules exactly:</div>'
+            );
+            showRules();
+          } else {
+            setTest('t-read', 'fail', '❌', 'Error ' + err.code + ': ' + err.message);
+          }
+          setTest('t-write', 'fail', '❌', 'Skipped — read failed first');
+          failures.push('write');
+          showSummary(failures);
+        });
+    }
+
+    function runWriteTest() {
+      // Write a test document to attendance, then immediately delete it
+      return window.db.collection('attendance').add({
+        _test: true,
+        phone: '0000000000',
+        memberName: '__TEST__',
+        date: '1970-01-01',
+        checkedInAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function (ref) {
+        return ref.delete().then(function () {
+          setTest('t-write', 'ok', '✅', 'Firestore write: ALLOWED ✓ — public can write attendance');
+          showSummary([]);
+        });
+      }).catch(function (err) {
+        if (err.code === 'permission-denied') {
+          setTest('t-write', 'fail', '❌',
+            'PERMISSION DENIED — Firestore rules are blocking public writes on attendance',
+            '<div class="fix"><strong>⚠️ This is your problem. Fix it now:</strong>' +
+            '<br>Same fix as above — update your Firestore Rules and click Publish.</div>'
+          );
+          showRules();
+        } else {
+          setTest('t-write', 'fail', '❌', 'Error ' + err.code + ': ' + err.message);
+        }
+        showSummary(['write']);
+      });
+    }
+
+    function showRules() {
+      var rules = 'rules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    function isAdmin() {\n      return request.auth != null &&\n        exists(/databases/$(database)/documents/admins/$(request.auth.uid));\n    }\n\n    match /admins/{uid} {\n      allow read:  if isAdmin();\n      allow write: if false;\n    }\n\n    match /members/{id} {\n      allow read:  if true;           // public — phone lookup\n      allow write: if isAdmin();\n    }\n\n    match /attendance/{id} {\n      allow read:   if true;          // public — duplicate check\n      allow create: if true;          // public — mark attendance\n      allow update, delete: if isAdmin();\n    }\n  }\n}';
+      var el = document.getElementById('fix-section');
+      if (!el.querySelector('pre')) {
+        el.innerHTML = '<div class="card"><h2>📋 Firestore Rules to Paste</h2><pre>' + rules + '</pre><p style="font-size:12px;color:#64748b">Copy everything above → Firebase Console → Firestore → Rules → Paste → Publish</p></div>';
+      }
+    }
+
+    function showSummary(failures) {
+      var el = document.getElementById('summary');
+      if (!failures.length) {
+        el.className = 'summary-ok';
+        el.innerHTML = '✅ All tests passed! The attendance page should work now. <a href="attendance.html">Open attendance.html →</a>';
+      } else {
+        el.className = 'summary-fail';
+        el.innerHTML = '❌ ' + failures.length + ' test(s) failed. Read the fix instructions above and try again.';
+      }
+    }
+
+    // Run automatically on load
+    window.addEventListener('load', function () { runTests(); });
+  </script>
+</body>
+
+</html>

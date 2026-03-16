@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SN.Fitnex — Members</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div id="page-loader" style="display:none"><div class="loader-inner"><div class="loader-spinner"></div><span id="loader-msg">Loading…</span></div></div>
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitnex">
+      <div class="sb-logo-text"><h2>SN.Fitnex</h2><span>Management</span></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section-label">Main Menu</div>
+      <a href="dashboard.html"  class="nav-link"><div class="nav-icon"><i class="fa-solid fa-chart-column"></i></div> Dashboard</a>
+      <a href="members.html"    class="nav-link"><div class="nav-icon"><i class="fa-solid fa-user-group"></i></div> Members <span class="nav-badge" id="nav-alert-badge" style="display:none">0</span></a>
+      <a href="add-member.html" class="nav-link"><div class="nav-icon"><i class="fa-solid fa-user-plus"></i></div> Add Member</a>
+      <a href="scanner.html"    class="nav-link"><div class="nav-icon"><i class="fa-solid fa-clipboard-user"></i></div> Attendance</a>
+      <a href="reports.html"    class="nav-link"><div class="nav-icon"><i class="fa-solid fa-chart-bar"></i></div> Reports</a>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-profile">
+        <div class="sb-avatar">A</div>
+        <div class="sb-profile-info"><h4>Admin</h4><p>Loading…</p></div>
+      </div>
+      <button class="btn-logout logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="topbar-title">Members</div>
+        <div class="topbar-sub">Manage all registered gym members</div>
+      </div>
+      <div class="topbar-right">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-date" id="date-badge"></div>
+        <div class="alert-bell"><i class="fa-solid fa-bell"></i><span class="alert-bell-dot"></span></div>
+        <button class="btn btn-primary btn-sm" id="add-btn"><i class="fa-solid fa-plus"></i> Add Member</button>
+        <div class="topbar-avatar">A</div>
+      </div>
+    </header>
+
+    <div class="page">
+      <div id="members-alerts" class="alerts-container"></div>
+      <div class="card">
+        <div class="table-toolbar">
+          <div class="search-wrap">
+            <span class="si"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="text" id="search-input" placeholder="Search by name or phone…">
+          </div>
+          <select class="filter-sel" id="status-filter">
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="expired">Expired Only</option>
+          </select>
+          <div class="toolbar-right">
+            <span id="member-count" style="font-size:12.5px;color:var(--t3)"></span>
+            <a href="reports.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead>
+              <tr><th>Member</th><th class="hide-sm">Phone</th><th class="hide-sm">Admission</th><th>Plan Expiry</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="members-tbody">
+              <tr><td colspan="6"><div class="empty-state" style="padding:36px">
+                <div class="es-icon"><i class="fa-solid fa-spinner fa-spin"></i></div><p>Loading members…</p>
+              </div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="overlay" id="member-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-left"><h3 id="modal-title">Add Member</h3><p id="modal-sub">Register a new member</p></div>
+      <button class="modal-x modal-cancel"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="photo-uploader">
+        <div class="pu-preview" id="pu-img">👤</div>
+        <div class="pu-info">
+          <p>Profile Photo <span style="color:var(--t4)">(optional)</span></p>
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer;display:inline-flex;margin-bottom:4px">
+            <i class="fa-solid fa-camera"></i> Upload Photo
+            <input type="file" id="photo-input" accept="image/*" style="display:none">
+          </label><br><span>JPG, PNG — max 2MB</span>
+        </div>
+      </div>
+      <form id="member-form">
+        <div class="fg">
+          <label>Full Name <span style="color:var(--red)">*</span></label>
+          <input type="text" id="m-name" class="fc" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        <div class="fg">
+          <label>Phone Number <span style="color:var(--red)">*</span>
+            <span style="font-size:11px;color:var(--t4);font-weight:400">(unique — used for QR)</span>
+          </label>
+          <input type="tel" id="m-phone" class="fc" placeholder="e.g. 9876543210" required>
+        </div>
+        <div class="form-2col">
+          <div class="fg"><label>Admission Date</label><input type="date" id="m-adm" class="fc"></div>
+          <div class="fg"><label>Plan Expiry <span style="color:var(--red)">*</span></label><input type="date" id="m-exp" class="fc" required></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary modal-cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('member-form').requestSubmit()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Member
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Renew Modal -->
+<div class="overlay" id="renew-overlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <div class="modal-head-left"><h3>Renew Plan</h3><p>Extending plan for <strong id="rn-member-name"></strong></p></div>
+      <button class="modal-x modal-cancel"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:18px;display:flex;justify-content:space-between">
+        <span style="font-size:13px;color:var(--t3)">Current Expiry</span>
+        <span style="font-size:13px;font-weight:600;color:var(--red)" id="rn-current-exp"></span>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:var(--t3);display:block;margin-bottom:8px">Quick Duration</label>
+        <div class="plan-grid">
+          <button class="plan-btn rn-plan-btn" data-months="1">+ 1 Month</button>
+          <button class="plan-btn rn-plan-btn" data-months="3">+ 3 Months</button>
+          <button class="plan-btn rn-plan-btn" data-months="6">+ 6 Months</button>
+          <button class="plan-btn rn-plan-btn" data-months="12">+ 1 Year</button>
+        </div>
+      </div>
+      <form id="renew-form">
+        <input type="hidden" id="rn-member-id">
+        <div class="fg">
+          <label>New Expiry Date <span style="color:var(--red)">*</span></label>
+          <input type="date" id="rn-new-exp" class="fc" required>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary modal-cancel">Cancel</button>
+      <button class="btn btn-success" onclick="document.getElementById('renew-form').requestSubmit()">
+        <i class="fa-solid fa-rotate"></i> Renew Plan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- QR Modal -->
+<div class="overlay" id="qr-overlay">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head">
+      <div class="modal-head-left"><h3>Member QR Code</h3><p>Scan at the attendance scanner</p></div>
+      <button class="modal-x" id="qr-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="qr-display-wrap">
+        <div class="qr-frame"><div id="qr-code-box"></div></div>
+        <div style="font-size:16px;font-weight:700;color:var(--t1)" id="qr-name"></div>
+        <div style="font-size:13px;color:var(--t3);margin-top:3px" id="qr-phone"></div>
+        <p style="font-size:12px;color:var(--t4);margin-top:10px;text-align:center;max-width:220px">Print or show this QR code at the scanner</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/cloudinary-config.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

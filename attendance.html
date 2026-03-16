@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>SN.Fitnex — Mark Attendance</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body class="att-public-body">
+
+  <!-- Animated background blobs -->
+  <div class="att-bg">
+    <div class="att-blob att-blob-1"></div>
+    <div class="att-blob att-blob-2"></div>
+  </div>
+
+  <div class="att-root">
+
+    <!-- ── Header ─────────────────────────────────────── -->
+    <header class="att-header">
+      <img src="logo.jpeg" class="att-logo" alt="SN.Fitnex" onerror="this.style.display='none'">
+      <div>
+        <div class="att-gym-name">SN.Fitnex</div>
+        <div class="att-date" id="att-date"></div>
+      </div>
+    </header>
+
+    <!-- ── Input card (shown first) ───────────────────── -->
+    <div class="att-card" id="att-input-card">
+      <div class="att-card-icon">
+        <i class="fa-solid fa-person-walking-arrow-right"></i>
+      </div>
+      <h1 class="att-card-title">Mark Your Attendance</h1>
+      <p class="att-card-sub">Enter your registered phone number to check in</p>
+
+      <form id="att-form" class="att-form" novalidate>
+        <div class="att-field">
+          <label for="att-phone">Phone Number</label>
+          <div class="att-field-wrap">
+            <span class="att-field-icon"><i class="fa-solid fa-phone"></i></span>
+            <input type="tel" id="att-phone" inputmode="numeric" pattern="[0-9]*" placeholder="e.g. 9876543210"
+              autocomplete="tel" maxlength="15" required>
+          </div>
+        </div>
+        <div class="att-error" id="att-error"></div>
+        <button type="submit" class="att-submit-btn" id="att-submit">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Check In</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- ── Result card (shown after lookup) ───────────── -->
+    <div class="att-card att-result-card" id="att-result-card" style="display:none">
+
+      <!-- SUCCESS: Active member, attendance marked -->
+      <div id="att-result-success" style="display:none">
+        <div class="att-result-icon att-result-icon--success">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="att-member-photo-wrap">
+          <div class="att-member-photo" id="att-member-photo"></div>
+        </div>
+        <div class="att-member-name" id="att-member-name"></div>
+        <div class="att-welcome-msg">Welcome! Your attendance has been marked.</div>
+        <div class="att-member-details" id="att-member-details"></div>
+      </div>
+
+      <!-- ALREADY: Already checked in today -->
+      <div id="att-result-already" style="display:none">
+        <div class="att-result-icon att-result-icon--already">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <div class="att-member-photo-wrap">
+          <div class="att-member-photo" id="att-member-photo-2"></div>
+        </div>
+        <div class="att-member-name" id="att-member-name-2"></div>
+        <div class="att-welcome-msg att-welcome-msg--already">You have already checked in today.</div>
+        <div class="att-member-details" id="att-member-details-2"></div>
+      </div>
+
+      <!-- EXPIRED: Plan expired -->
+      <div id="att-result-expired" style="display:none">
+        <div class="att-result-icon att-result-icon--expired">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="att-member-photo-wrap">
+          <div class="att-member-photo" id="att-member-photo-3"></div>
+        </div>
+        <div class="att-member-name" id="att-member-name-3"></div>
+        <div class="att-expired-msg">
+          <strong>Your plan has expired.</strong><br>
+          Please contact the gym to renew your membership.
+        </div>
+        <div class="att-member-details" id="att-member-details-3"></div>
+      </div>
+
+      <!-- NOT FOUND -->
+      <div id="att-result-notfound" style="display:none">
+        <div class="att-result-icon att-result-icon--notfound">
+          <i class="fa-solid fa-user-xmark"></i>
+        </div>
+        <div class="att-notfound-msg">
+          <strong>Member not found.</strong><br>
+          The phone number <span id="att-notfound-phone" class="att-notfound-phone"></span> is not registered.<br>
+          Please contact the gym front desk.
+        </div>
+      </div>
+
+      <!-- Check-in again button -->
+      <button class="att-back-btn" id="att-back-btn">
+        <i class="fa-solid fa-arrow-left"></i> Check In Again
+      </button>
+    </div>
+
+    <!-- ── Footer ──────────────────────────────────────── -->
+    <footer class="att-footer">
+      Powered by SN.Fitnex Management System
+    </footer>
+
+  </div>
+
+  <!-- Firebase Compat SDK — same config as admin pages, reuses window.db -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- Reuse the same firebase-config.js — sets window.db which attendance-public.js uses -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/attendance-public.js"></script>
+</body>
+
+</html>
