@@ -413,23 +413,26 @@ function initLogin() {
           return auth.signInWithEmailAndPassword(email, pass);
         })
         .then(function (cred) {
-          // Check admin whitelist
-          return db.collection("admins").doc(cred.user.uid).get();
-        })
-        .then(function (snap) {
-          if (!snap.exists) {
-            auth.signOut();
-            throw new Error("Access denied. This account is not an authorised admin.");
-          }
-          // Cache the admin session so subsequent pages load without Firestore round-trip
-          _setCachedAdmin(cred.user.uid, cred.user.email);
-          window.location.href = "dashboard.html";
+          // Store uid/email outside the chain so the next .then() can access them
+          // (cred is NOT in scope in the next .then callback — this fixes "cred is not defined")
+          var uid       = cred.user.uid;
+          var userEmail = cred.user.email;
+
+          return db.collection("admins").doc(uid).get()
+            .then(function (snap) {
+              if (!snap.exists) {
+                auth.signOut();
+                throw new Error("Access denied. This account is not an authorised admin.");
+              }
+              // Cache so subsequent pages skip the Firestore round-trip
+              _setCachedAdmin(uid, userEmail);
+              window.location.href = "dashboard.html";
+            });
         })
         .catch(function (err) {
           setButtonLoading(btn, false);
           errEl.classList.add("show");
           var msg = err.message;
-          // Friendly Firebase error messages
           if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" ||
               err.code === "auth/invalid-credential" || err.code === "auth/invalid-email") {
             msg = "Incorrect email or password. Please try again.";
