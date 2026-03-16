@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SN.Fitnex — Reports</title>
+  <title>SN.Fitness — Reports</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <!-- jsPDF — used for PDF attendance export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF AutoTable plugin — clean table rendering in PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
@@ -17,8 +21,8 @@
 <div class="shell">
   <aside class="sidebar">
     <div class="sb-logo">
-      <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitnex">
-      <div class="sb-logo-text"><h2>SN.Fitnex</h2><span>Management</span></div>
+      <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitness">
+      <div class="sb-logo-text"><h2>SN.Fitness</h2><span>Management</span></div>
     </div>
     <nav class="sb-nav">
       <div class="sb-section-label">Main Menu</div>
@@ -78,6 +82,7 @@
           </div>
           <div class="report-card-body" id="rep-members-stat"></div>
           <div class="report-card-foot">
+            <button class="btn btn-danger btn-sm" onclick="dlMembersPDF(this)"><i class="fa-solid fa-file-pdf"></i> PDF</button>
             <button class="btn btn-success btn-sm" onclick="dlMembersCSV(this)"><i class="fa-solid fa-file-csv"></i> CSV</button>
             <button class="btn btn-primary btn-sm" onclick="dlMembersXLS(this)"><i class="fa-solid fa-file-excel"></i> Excel</button>
           </div>
@@ -90,6 +95,7 @@
           </div>
           <div class="report-card-body" id="rep-att-stat"></div>
           <div class="report-card-foot">
+            <button class="btn btn-danger btn-sm" onclick="dlAttPDF(this)"><i class="fa-solid fa-file-pdf"></i> PDF</button>
             <button class="btn btn-success btn-sm" onclick="dlAttCSV(this)"><i class="fa-solid fa-file-csv"></i> CSV</button>
             <button class="btn btn-primary btn-sm" onclick="dlAttXLS(this)"><i class="fa-solid fa-file-excel"></i> Excel</button>
           </div>
@@ -105,7 +111,8 @@
             <div class="report-stat"><span class="report-stat-label">This Month</span><span class="report-stat-val" id="rep-month-att">—</span></div>
           </div>
           <div class="report-card-foot">
-            <button class="btn btn-success btn-sm" onclick="dlFullCSV(this)"><i class="fa-solid fa-file-csv"></i> Download CSV</button>
+            <button class="btn btn-danger btn-sm" onclick="dlFullPDF(this)"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-success btn-sm" onclick="dlFullCSV(this)"><i class="fa-solid fa-file-csv"></i> CSV</button>
           </div>
         </div>
 
@@ -128,25 +135,117 @@
         </div>
       </div>
 
+      <!-- ── Admission Report by Custom Date Range ── -->
       <div class="card">
         <div class="card-head">
-          <div class="card-head-left"><h2>Member Performance Table</h2><p>All members with attendance stats</p></div>
+          <div class="card-head-left">
+            <h2><i class="fa-solid fa-user-plus"></i> Admission Report by Date Range</h2>
+            <p>Filter members by their admission date and export the list</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-2col" style="margin-bottom:16px">
+            <div class="fg">
+              <label>Start Date <span style="color:var(--red)">*</span></label>
+              <input type="date" id="adm-range-start" class="fc">
+            </div>
+            <div class="fg">
+              <label>End Date <span style="color:var(--red)">*</span></label>
+              <input type="date" id="adm-range-end" class="fc">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-danger" onclick="dlAdmissionRange(this,'pdf')" style="flex:1;min-width:120px;justify-content:center">
+              <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </button>
+            <button class="btn btn-success" onclick="dlAdmissionRange(this,'csv')" style="flex:1;min-width:120px;justify-content:center">
+              <i class="fa-solid fa-file-csv"></i> Download CSV
+            </button>
+            <button class="btn btn-primary" onclick="dlAdmissionRange(this,'xls')" style="flex:1;min-width:120px;justify-content:center">
+              <i class="fa-solid fa-file-excel"></i> Download Excel
+            </button>
+          </div>
+          <p style="font-size:12px;color:var(--t4);margin-top:10px">
+            <i class="fa-solid fa-circle-info"></i>
+            Exports: Member Name, Phone, Admission Date, Expiry Date, Status — filtered by admission date.
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h2>Member Performance Table</h2>
+            <p>All members with attendance stats — filterable &amp; paginated</p>
+          </div>
           <div style="display:flex;gap:8px">
+            <button class="btn btn-danger btn-sm" onclick="dlFullPDF(this)"><i class="fa-solid fa-file-pdf"></i> Full PDF</button>
             <button class="btn btn-success btn-sm" onclick="dlFullCSV(this)"><i class="fa-solid fa-file-csv"></i> Full CSV</button>
             <button class="btn btn-secondary btn-sm" onclick="dlAttCSV(this)"><i class="fa-solid fa-clipboard-list"></i> Attendance CSV</button>
           </div>
         </div>
+
+        <!-- Toolbar: search + status filter + rows-per-page -->
+        <div class="table-toolbar">
+          <div class="search-wrap">
+            <span class="si"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="text" id="rep-search" placeholder="Search by name or phone…" oninput="repApplyFilters()">
+          </div>
+          <select class="filter-sel" id="rep-status-filter" onchange="repApplyFilters()">
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="expired">Expired Only</option>
+          </select>
+          <div class="toolbar-right">
+            <span id="rep-count-label" style="font-size:12.5px;color:var(--t3)"></span>
+            <div class="rep-per-page">
+              <label for="rep-per-page">Rows:</label>
+              <select id="rep-per-page" onchange="repApplyFilters()">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selection info bar (shows when rows are checked) -->
+        <div class="rep-selection-bar" id="rep-selection-bar">
+          <i class="fa-solid fa-check-square"></i>
+          <span id="rep-selection-count">0 rows selected</span>
+          <button onclick="repClearSelection()"><i class="fa-solid fa-xmark"></i> Clear</button>
+        </div>
+
+        <!-- Table -->
         <div class="table-wrap">
           <table class="dt">
             <thead>
-              <tr><th>Member</th><th>Admission</th><th>Expiry</th><th>Status</th><th style="text-align:center">Total Visits</th><th>Last Visit</th><th style="text-align:center">Today</th></tr>
+              <tr>
+                <th class="col-chk">
+                  <input type="checkbox" id="rep-chk-all" title="Select all on this page" onchange="repToggleAll(this)">
+                </th>
+                <th>Member</th>
+                <th>Admission</th>
+                <th>Expiry</th>
+                <th>Status</th>
+                <th style="text-align:center">Total Visits</th>
+                <th>Last Visit</th>
+                <th style="text-align:center">Today</th>
+              </tr>
             </thead>
             <tbody id="rep-tbl-body">
-              <tr><td colspan="7"><div class="empty-state" style="padding:28px">
+              <tr><td colspan="8"><div class="empty-state" style="padding:28px">
                 <div class="es-icon"><i class="fa-solid fa-spinner fa-spin"></i></div><p>Loading report data…</p>
               </div></td></tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Pagination bar -->
+        <div class="rep-pagination" id="rep-pagination" style="display:none">
+          <span class="rep-pagination-info" id="rep-page-info"></span>
+          <div class="rep-pagination-controls" id="rep-page-controls"></div>
         </div>
       </div>
     </div>

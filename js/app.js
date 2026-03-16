@@ -693,7 +693,6 @@ function renderMembersTable(filtered) {
       "<td><span style='font-size:12px;color:" + dlColor + "'>" + dlTxt + "</span></td>" +
       "<td><span class='badge " + badgeCls + "'><span class='badge-dot'></span>" + badgeTxt + "</span></td>" +
       "<td><div class='act-cell'>" +
-        "<button class='btn btn-secondary btn-sm' onclick='openQRModal(\"" + m.id + "\")'><i class='fa-solid fa-qrcode'></i><span class='btn-label'> QR</span></button>" +
         "<button class='btn btn-secondary btn-sm' onclick='openEditModal(\"" + m.id + "\")'><i class='fa-solid fa-pen'></i><span class='btn-label'> Edit</span></button>" +
         renewBtn +
         "<button class='btn btn-danger btn-sm' onclick='confirmDelete(\"" + m.id + "\")'><i class='fa-solid fa-trash'></i></button>" +
@@ -715,7 +714,6 @@ function bindMembersEvents() {
 
   if (getEl("member-form")) getEl("member-form").addEventListener("submit", handleSaveMember);
   if (getEl("renew-form"))  getEl("renew-form").addEventListener("submit", handleRenew);
-  if (getEl("qr-close"))    getEl("qr-close").addEventListener("click", closeAllModals);
 
   document.querySelectorAll(".rn-plan-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
@@ -888,6 +886,9 @@ window.openQRModal = function (id) {
    ██████  ADD MEMBER PAGE
 ═══════════════════════════════════════════════════════════ */
 
+// Holds the last successfully added member so the PDF function can read it
+var _lastAddedMember = null;
+
 function initAddMember() {
   requireAuth(function () {
     var photoFile = null;
@@ -932,15 +933,41 @@ function initAddMember() {
             photoURL: "", createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }).then(function (ref) {
-            // ── Upload photo to Cloudinary if provided ──────────
+            // Store the member ID so the PDF can use it
+            _lastAddedMember = { id: ref.id, name: name, phone: phone, admissionDate: adm, expiryDate: exp, photoURL: "" };
+
             if (!photoFile) return Promise.resolve();
             return uploadToCloudinary(photoFile, ref.id)
               .then(function (url) {
-                // Save the Cloudinary URL back into the new Firestore document
+                _lastAddedMember.photoURL = url;
                 return db.collection("members").doc(ref.id).update({ photoURL: url });
               });
           }).then(function () {
             showToast("Member added!", name + " registered successfully", "success");
+
+            // ── Show admission success card ──────────────────────
+            var card = getEl("am-success-card");
+            var summary = getEl("am-success-summary");
+            if (card && summary && _lastAddedMember) {
+              summary.innerHTML =
+                '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+                  (_lastAddedMember.photoURL
+                    ? '<img src="' + _lastAddedMember.photoURL + '" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--green-border)">'
+                    : '<div style="width:46px;height:46px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--green)">' +
+                        _lastAddedMember.name.trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase() +
+                      '</div>') +
+                  '<div><div style="font-weight:700;font-size:14px">' + _lastAddedMember.name + '</div>' +
+                  '<div style="font-size:12px;color:var(--t3)">' + _lastAddedMember.phone + '</div></div>' +
+                '</div>' +
+                '<div style="color:var(--t3)"><i class="fa-solid fa-id-card" style="margin-right:5px"></i>ID: <strong style="color:var(--t1)">' + _lastAddedMember.id.slice(-8).toUpperCase() + '</strong></div>' +
+                '<div style="color:var(--t3)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>Admission: <strong style="color:var(--t1)">' + fmtDate(_lastAddedMember.admissionDate) + '</strong></div>' +
+                '<div style="color:var(--t3)"><i class="fa-solid fa-hourglass-half" style="margin-right:5px"></i>Expiry: <strong style="color:var(--t1)">' + fmtDate(_lastAddedMember.expiryDate) + '</strong></div>';
+              card.style.display = "";
+              // Scroll the success card into view smoothly
+              card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+
+            // Reset form
             amForm.reset();
             getEl("am-adm").value = todayStr();
             getEl("am-pu-img").innerHTML = "👤";
@@ -1254,34 +1281,260 @@ function initReports() {
       // Calendar
       renderCalendar(attendance);
 
-      // Performance table
-      var tbody = getEl("rep-tbl-body");
-      if (tbody) {
-        if (!members.length) {
-          tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state" style="padding:28px"><p>No data available</p></div></td></tr>';
-        } else {
-          tbody.innerHTML = members.map(function (m) {
-            var exp      = isExpired(m.expiryDate);
-            var mAtt     = attendance.filter(function (a) { return a.memberId === m.id; });
-            var lastAtt  = mAtt.sort(function (a, b) { return (b.checkedInAt && b.checkedInAt.seconds || 0) - (a.checkedInAt && a.checkedInAt.seconds || 0); })[0];
-            var todayChk = attendance.some(function (a) { return a.memberId === m.id && a.date === today; });
-            return "<tr>" +
-              "<td><div class='member-cell'>" + memberAvatarHTML(m, 32) + "<div><div class='mc-name'>" + m.name + "</div><div class='mc-sub'>" + m.phone + "</div></div></div></td>" +
-              "<td>" + fmtDate(m.admissionDate) + "</td>" +
-              "<td>" + fmtDate(m.expiryDate) + "</td>" +
-              "<td><span class='badge " + (exp ? "badge-inactive" : "badge-active") + "'><span class='badge-dot'></span>" + (exp ? "Expired" : "Active") + "</span></td>" +
-              "<td style='text-align:center;font-weight:600'>" + mAtt.length + "</td>" +
-              "<td style='font-size:12px'>" + (lastAtt ? fmtDate(lastAtt.date) : "Never") + "</td>" +
-              "<td style='text-align:center'>" + (todayChk ? "✅" : "—") + "</td></tr>";
-          }).join("");
-        }
-      }
+      // ── Performance table — build row data then hand off to the
+      //    interactive table engine (search / filter / pagination / checkboxes)
+      var today = todayStr();
+      var _repRows = members.map(function (m) {
+        var exp      = isExpired(m.expiryDate);
+        var dl       = daysLeft(m.expiryDate);
+        var mAtt     = attendance.filter(function (a) { return a.memberId === m.id; });
+        var lastAtt  = mAtt.slice().sort(function (a, b) {
+          return (b.checkedInAt && b.checkedInAt.seconds || 0) - (a.checkedInAt && a.checkedInAt.seconds || 0);
+        })[0];
+        var todayChk = attendance.some(function (a) { return a.memberId === m.id && a.date === today; });
+        return {
+          id:        m.id,
+          name:      m.name,
+          phone:     m.phone,
+          exp:       exp,
+          dl:        dl,
+          admission: m.admissionDate,
+          expiry:    m.expiryDate,
+          visits:    mAtt.length,
+          lastDate:  lastAtt ? lastAtt.date : null,
+          todayChk:  todayChk,
+          photoURL:  m.photoURL || "",
+          // pre-built avatar HTML for fast re-render
+          avatarHTML: memberAvatarHTML(m, 32)
+        };
+      });
+
+      // Store globally so filter/pagination functions can access it
+      window._repAllRows     = _repRows;
+      window._repFilteredRows = _repRows.slice();
+      window._repPage        = 1;
+      window._repSelected    = {};   // { rowId: true }
+
+      repRenderTable();
 
       // Bind export buttons
       window._reportData = { members: members, attendance: attendance };
 
     }).catch(function (err) { showToast("Failed to load reports", err.message, "error"); });
   });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ██████  PERFORMANCE TABLE ENGINE
+   search · status filter · pagination · row checkboxes
+   All functions are prefixed rep* to avoid name collisions.
+═══════════════════════════════════════════════════════════ */
+
+// Called by search input and status dropdown (oninput / onchange)
+window.repApplyFilters = function () {
+  if (!window._repAllRows) return;
+  var q   = (getEl("rep-search")        ? getEl("rep-search").value.toLowerCase()        : "");
+  var st  = (getEl("rep-status-filter") ? getEl("rep-status-filter").value                : "all");
+
+  window._repFilteredRows = window._repAllRows.filter(function (r) {
+    var matchQ  = !q || r.name.toLowerCase().indexOf(q) !== -1 || r.phone.indexOf(q) !== -1;
+    var matchSt = st === "all" ||
+                  (st === "active"  && !r.exp) ||
+                  (st === "expired" &&  r.exp);
+    return matchQ && matchSt;
+  });
+
+  window._repPage = 1;          // reset to first page on every filter change
+  window._repSelected = {};     // clear selections when filter changes
+  repRenderTable();
+};
+
+// Renders the current page of filtered rows into the tbody + pagination bar
+function repRenderTable() {
+  var tbody    = getEl("rep-tbl-body");
+  if (!tbody) return;
+
+  var allRows  = window._repFilteredRows || [];
+  var perPage  = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
+  var page     = window._repPage || 1;
+  var total    = allRows.length;
+  var pages    = Math.max(1, Math.ceil(total / perPage));
+
+  // Clamp page to valid range
+  if (page > pages) { page = pages; window._repPage = page; }
+
+  var start    = (page - 1) * perPage;
+  var pageRows = allRows.slice(start, start + perPage);
+
+  // Count label
+  var cntEl = getEl("rep-count-label");
+  if (cntEl) cntEl.textContent = total + " member" + (total !== 1 ? "s" : "");
+
+  // ── Empty state ────────────────────────────────────────
+  if (!total) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" style="padding:36px">' +
+      '<div class="es-icon"><i class="fa-solid fa-magnifying-glass"></i></div>' +
+      '<h3>No members match</h3><p>Try adjusting your search or filter.</p>' +
+      '</div></td></tr>';
+    repRenderPagination(0, 1, 1, perPage);
+    repUpdateSelectionBar();
+    return;
+  }
+
+  // ── Are ALL rows on this page selected? ───────────────
+  var allPageSelected = pageRows.every(function (r) { return window._repSelected[r.id]; });
+
+  // ── Build rows ─────────────────────────────────────────
+  tbody.innerHTML = pageRows.map(function (r) {
+    var checked  = window._repSelected[r.id] ? " checked" : "";
+    var selCls   = window._repSelected[r.id] ? " row-selected" : "";
+    var badgeCls = r.exp ? "badge-inactive" : r.dl <= 3 ? "badge-warn" : "badge-active";
+    var badgeTxt = r.exp ? "Expired" : r.dl <= 3 ? "Expiring" : "Active";
+
+    return "<tr class='rep-row" + selCls + "' data-id='" + r.id + "'>" +
+      "<td class='col-chk'><input type='checkbox' class='rep-row-chk'" + checked +
+        " onchange=\"repToggleRow('" + r.id + "',this)\"></td>" +
+      "<td><div class='member-cell'>" + r.avatarHTML +
+        "<div><div class='mc-name'>" + r.name + "</div><div class='mc-sub'>" + r.phone + "</div></div></div></td>" +
+      "<td>" + fmtDate(r.admission) + "</td>" +
+      "<td>" + fmtDate(r.expiry) + "</td>" +
+      "<td><span class='badge " + badgeCls + "'><span class='badge-dot'></span>" + badgeTxt + "</span></td>" +
+      "<td style='text-align:center;font-weight:600'>" + r.visits + "</td>" +
+      "<td style='font-size:12px'>" + (r.lastDate ? fmtDate(r.lastDate) : "Never") + "</td>" +
+      "<td style='text-align:center'>" + (r.todayChk ? "✅" : "—") + "</td>" +
+      "</tr>";
+  }).join("");
+
+  // Sync select-all checkbox header state
+  var chkAll = getEl("rep-chk-all");
+  if (chkAll) {
+    chkAll.checked       = allPageSelected && pageRows.length > 0;
+    chkAll.indeterminate = !allPageSelected && pageRows.some(function (r) { return window._repSelected[r.id]; });
+  }
+
+  repRenderPagination(total, page, pages, perPage);
+  repUpdateSelectionBar();
+}
+
+// Renders the pagination controls
+function repRenderPagination(total, page, pages, perPage) {
+  var bar      = getEl("rep-pagination");
+  var infoEl   = getEl("rep-page-info");
+  var ctrlEl   = getEl("rep-page-controls");
+  if (!bar || !infoEl || !ctrlEl) return;
+
+  if (total === 0) { bar.style.display = "none"; return; }
+  bar.style.display = "";
+
+  var start = (page - 1) * perPage + 1;
+  var end   = Math.min(page * perPage, total);
+  infoEl.textContent = "Showing " + start + "–" + end + " of " + total;
+
+  // Build page number buttons (show max 5 around current)
+  var html = "";
+
+  // Previous
+  html += "<button class='rep-page-btn' onclick='repGoPage(" + (page - 1) + ")'" +
+    (page <= 1 ? " disabled" : "") + ">" +
+    "<i class='fa-solid fa-chevron-left'></i></button>";
+
+  // Page number buttons
+  var btnStart = Math.max(1, page - 2);
+  var btnEnd   = Math.min(pages, page + 2);
+  // Always show first page
+  if (btnStart > 1) {
+    html += "<button class='rep-page-btn' onclick='repGoPage(1)'>1</button>";
+    if (btnStart > 2) html += "<span style='padding:0 4px;color:var(--t4)'>…</span>";
+  }
+  for (var i = btnStart; i <= btnEnd; i++) {
+    html += "<button class='rep-page-btn" + (i === page ? " active" : "") +
+      "' onclick='repGoPage(" + i + ")'>" + i + "</button>";
+  }
+  // Always show last page
+  if (btnEnd < pages) {
+    if (btnEnd < pages - 1) html += "<span style='padding:0 4px;color:var(--t4)'>…</span>";
+    html += "<button class='rep-page-btn' onclick='repGoPage(" + pages + ")'>" + pages + "</button>";
+  }
+
+  // Next
+  html += "<button class='rep-page-btn' onclick='repGoPage(" + (page + 1) + ")'" +
+    (page >= pages ? " disabled" : "") + ">" +
+    "<i class='fa-solid fa-chevron-right'></i></button>";
+
+  ctrlEl.innerHTML = html;
+}
+
+// Navigate to a specific page
+window.repGoPage = function (n) {
+  var allRows = window._repFilteredRows || [];
+  var perPage = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
+  var pages   = Math.max(1, Math.ceil(allRows.length / perPage));
+  window._repPage = Math.max(1, Math.min(n, pages));
+  repRenderTable();
+  // Scroll table into view on page change
+  var card = getEl("rep-tbl-body");
+  if (card) card.closest(".card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+};
+
+// Toggle a single row's selected state
+window.repToggleRow = function (id, chk) {
+  if (chk.checked) {
+    window._repSelected[id] = true;
+  } else {
+    delete window._repSelected[id];
+  }
+  // Update row highlight class directly without full re-render
+  var row = document.querySelector("tr.rep-row[data-id='" + id + "']");
+  if (row) row.classList.toggle("row-selected", !!window._repSelected[id]);
+  // Update select-all checkbox state
+  var allRows = window._repFilteredRows || [];
+  var perPage = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
+  var page    = window._repPage || 1;
+  var pageRows = allRows.slice((page - 1) * perPage, page * perPage);
+  var allPageSelected = pageRows.every(function (r) { return window._repSelected[r.id]; });
+  var anySelected     = pageRows.some(function (r) { return window._repSelected[r.id]; });
+  var chkAll = getEl("rep-chk-all");
+  if (chkAll) {
+    chkAll.checked       = allPageSelected;
+    chkAll.indeterminate = !allPageSelected && anySelected;
+  }
+  repUpdateSelectionBar();
+};
+
+// Toggle all rows on the current page
+window.repToggleAll = function (chkAll) {
+  var allRows  = window._repFilteredRows || [];
+  var perPage  = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
+  var page     = window._repPage || 1;
+  var pageRows = allRows.slice((page - 1) * perPage, page * perPage);
+  pageRows.forEach(function (r) {
+    if (chkAll.checked) {
+      window._repSelected[r.id] = true;
+    } else {
+      delete window._repSelected[r.id];
+    }
+  });
+  repRenderTable(); // full re-render to sync all checkboxes + highlights
+};
+
+// Clear all selections
+window.repClearSelection = function () {
+  window._repSelected = {};
+  repRenderTable();
+};
+
+// Show / hide the selection info bar
+function repUpdateSelectionBar() {
+  var bar   = getEl("rep-selection-bar");
+  var label = getEl("rep-selection-count");
+  if (!bar) return;
+  var count = Object.keys(window._repSelected).length;
+  if (count > 0) {
+    bar.classList.add("visible");
+    if (label) label.textContent = count + " row" + (count !== 1 ? "s" : "") + " selected";
+  } else {
+    bar.classList.remove("visible");
+  }
 }
 
 function renderCalendar(attendance) {
@@ -1365,6 +1618,21 @@ window.dlMembersXLS = function (btn) {
   setButtonLoading(btn, false);
 };
 
+window.dlMembersPDF = function (btn) {
+  if (!window._reportData) return;
+  var data = window._reportData;
+  setButtonLoading(btn, true);
+  var header = ["ID","Name","Phone","Admission Date","Expiry Date","Status","Total Visits"];
+  var rows = data.members.map(function (m) {
+    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate||"", m.expiryDate||"", isExpired(m.expiryDate)?"Expired":"Active", data.attendance.filter(function(a){return a.memberId===m.id;}).length];
+  });
+  _makeReportPDF("SN.Fitness — Members Report",
+    "Total members: " + data.members.length,
+    header, rows, "snfitness_members.pdf");
+  showToast("Downloaded", "snfitness_members.pdf", "success");
+  setButtonLoading(btn, false);
+};
+
 window.dlAttCSV = function (btn) {
   if (!window._reportData) return;
   setButtonLoading(btn, true);
@@ -1389,6 +1657,20 @@ window.dlAttXLS = function (btn) {
   setButtonLoading(btn, false);
 };
 
+window.dlAttPDF = function (btn) {
+  if (!window._reportData) return;
+  setButtonLoading(btn, true);
+  var header = ["Date","Member Name","Phone","Check-in Time"];
+  var rows = window._reportData.attendance.map(function (a) {
+    return [a.date||"", a.memberName||"Unknown", a.phone||"", fmtTime(a.checkedInAt)];
+  });
+  _makeReportPDF("SN.Fitness — Attendance Report",
+    "All-time check-ins: " + rows.length,
+    header, rows, "snfitness_attendance.pdf");
+  showToast("Downloaded", "snfitness_attendance.pdf", "success");
+  setButtonLoading(btn, false);
+};
+
 window.dlFullCSV = function (btn) {
   if (!window._reportData) return;
   var data = window._reportData;
@@ -1403,9 +1685,299 @@ window.dlFullCSV = function (btn) {
   setButtonLoading(btn, false);
 };
 
+window.dlFullPDF = function (btn) {
+  if (!window._reportData) return;
+  var data = window._reportData;
+  setButtonLoading(btn, true);
+  var header = ["Name","Phone","Status","Admission","Expiry","Total Visits","Last Visit"];
+  var rows = data.members.map(function (m) {
+    var mAtt = data.attendance.filter(function(a){return a.memberId===m.id;}).sort(function(a,b){return(b.checkedInAt&&b.checkedInAt.seconds||0)-(a.checkedInAt&&a.checkedInAt.seconds||0);});
+    return [m.name, m.phone, isExpired(m.expiryDate)?"Expired":"Active", m.admissionDate||"", m.expiryDate||"", mAtt.length, mAtt[0]?fmtDate(mAtt[0].date):"Never"];
+  });
+  _makeReportPDF("SN.Fitness — Full Combined Report",
+    "Members: " + data.members.length + "  |  All-time check-ins: " + data.attendance.length,
+    header, rows, "snfitness_full_report.pdf");
+  showToast("Downloaded", "snfitness_full_report.pdf", "success");
+  setButtonLoading(btn, false);
+};
+
+/* ── Shared PDF builder used by all report PDF buttons ───────
+   Uses jsPDF + autoTable (loaded in reports.html).
+   Landscape A4, branded blue header, striped table, page footer.
+─────────────────────────────────────────────────────────── */
+function _makeReportPDF(title, subtitle, header, rows, filename) {
+  var jsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF || null);
+  if (!jsPDF) { showToast("PDF library not loaded", "Please refresh and try again", "error"); return; }
+
+  var doc   = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  var pageW = doc.internal.pageSize.getWidth();
+
+  // Header band
+  doc.setFillColor(67, 97, 238);
+  doc.rect(0, 0, pageW, 20, "F");
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(255, 255, 255);
+  doc.text(title, pageW / 2, 9, { align: "center" });
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text(subtitle + "   |   Generated on " + new Date().toLocaleDateString("en-IN"),
+    pageW / 2, 16, { align: "center" });
+
+  // Table
+  doc.autoTable({
+    startY: 24,
+    head:   [header],
+    body:   rows,
+    theme:  "striped",
+    headStyles:          { fillColor: [67, 97, 238], textColor: 255, fontStyle: "bold", fontSize: 9 },
+    bodyStyles:          { fontSize: 8, textColor: [40, 40, 40] },
+    alternateRowStyles:  { fillColor: [245, 246, 250] },
+    margin:              { left: 12, right: 12 },
+    didDrawPage: function (data) {
+      var n = doc.internal.getNumberOfPages();
+      doc.setFontSize(7.5);
+      doc.setTextColor(160, 160, 160);
+      doc.text("Page " + data.pageNumber + " of " + n,
+        pageW / 2, doc.internal.pageSize.getHeight() - 5, { align: "center" });
+    }
+  });
+
+  doc.save(filename);
+}
+
 /* ═══════════════════════════════════════════════════════════
-   PAGE ROUTER — auto-init based on current filename
+   ██████  FEATURE 1 — ADMISSION PDF DOWNLOAD
+   Uses jsPDF (loaded in add-member.html).
+   Reads _lastAddedMember set by initAddMember on save.
 ═══════════════════════════════════════════════════════════ */
+
+window.downloadAdmissionPDF = function () {
+  var m = _lastAddedMember;
+  if (!m) { showToast("No member data", "Please register a member first", "error"); return; }
+
+  // jsPDF UMD exposes window.jspdf.jsPDF
+  var jsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF || null);
+  if (!jsPDF) { showToast("PDF library not loaded", "Please refresh and try again", "error"); return; }
+
+  var doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
+  var W   = doc.internal.pageSize.getWidth();   // A5 = 148 mm
+  var y   = 0;  // current Y cursor
+
+  // ── Helpers ──────────────────────────────────────────────
+  function line(text, fontSize, fontStyle, color, align, yPos) {
+    doc.setFontSize(fontSize || 12);
+    doc.setFont("helvetica", fontStyle || "normal");
+    doc.setTextColor.apply(doc, color || [30, 30, 30]);
+    doc.text(text, align === "center" ? W / 2 : 12, yPos !== undefined ? yPos : y, { align: align || "left" });
+  }
+  function separator(yPos) {
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.3);
+    doc.line(12, yPos, W - 12, yPos);
+  }
+  function labelValue(label, value, yPos) {
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(120, 120, 120);
+    doc.text(label, 14, yPos);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 30, 30);
+    doc.text(value || "—", 55, yPos);
+  }
+
+  // ── Header band ───────────────────────────────────────────
+  doc.setFillColor(67, 97, 238);          // brand colour
+  doc.rect(0, 0, W, 24, "F");
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(255, 255, 255);
+  doc.text("SN.Fitness", W / 2, 10, { align: "center" });
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text("Membership Admission Card", W / 2, 17, { align: "center" });
+
+  y = 32;
+
+  // ── Photo or avatar circle ────────────────────────────────
+  var photoLoaded = false;
+  function renderBody() {
+    // Member name
+    doc.setFontSize(15);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 30, 30);
+    doc.text(m.name, W / 2, y + (photoLoaded ? 0 : 0), { align: "center" });
+    y += 7;
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Member since " + fmtDate(m.admissionDate), W / 2, y, { align: "center" });
+    y += 9;
+
+    separator(y); y += 7;
+
+    // Details
+    var rows = [
+      ["Member ID",      m.id.slice(-8).toUpperCase()],
+      ["Phone Number",   m.phone],
+      ["Admission Date", fmtDate(m.admissionDate)],
+      ["Plan Expiry",    fmtDate(m.expiryDate)]
+    ];
+    rows.forEach(function (r) {
+      labelValue(r[0], r[1], y);
+      y += 8;
+    });
+
+    separator(y); y += 8;
+
+    // Status badge text
+    var isExp = isExpired(m.expiryDate);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(isExp ? 220 : 22, isExp ? 38 : 163, isExp ? 38 : 74);
+    doc.text("Plan Status: " + (isExp ? "EXPIRED" : "ACTIVE"), W / 2, y, { align: "center" });
+    y += 10;
+
+    separator(y); y += 7;
+
+    // Footer note
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(160, 160, 160);
+    doc.text("This is a computer-generated admission card.", W / 2, y, { align: "center" });
+    y += 5;
+    doc.text("Printed on " + new Date().toLocaleDateString("en-IN"), W / 2, y, { align: "center" });
+
+    // ── Bottom accent line ────────────────────────────────────
+    doc.setFillColor(67, 97, 238);
+    doc.rect(0, doc.internal.pageSize.getHeight() - 6, W, 6, "F");
+
+    doc.save("SN_Fitness_Admission_" + m.name.replace(/\s+/g, "_") + ".pdf");
+    showToast("PDF downloaded!", m.name + "'s admission card saved", "success");
+  }
+
+  // If member has a photo, embed it; otherwise go straight to renderBody
+  if (m.photoURL) {
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+      try {
+        // Draw circular clip using canvas
+        var size = 28; // mm diameter
+        var canvas = document.createElement("canvas");
+        var px = Math.round(size * 3.78); // 1mm ≈ 3.78px at 96dpi
+        canvas.width = px; canvas.height = px;
+        var ctx = canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.arc(px / 2, px / 2, px / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, 0, 0, px, px);
+        var dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        doc.addImage(dataUrl, "JPEG", (W - size) / 2, y, size, size);
+        y += size + 5;
+        photoLoaded = true;
+      } catch (_) { /* CORS or draw failed — skip photo */ }
+      renderBody();
+    };
+    img.onerror = function () { renderBody(); }; // photo failed to load
+    img.src = m.photoURL;
+  } else {
+    // Draw initials circle
+    var initials = m.name.trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
+    var cx = W / 2, cy = y + 14, r = 14;
+    doc.setFillColor(238, 240, 253); // brand-light
+    doc.circle(cx, cy, r, "F");
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(67, 97, 238);
+    doc.text(initials, cx, cy + 5, { align: "center" });
+    y += r * 2 + 6;
+    renderBody();
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════
+   ██████  ADMISSION REPORT BY DATE RANGE
+   Filters the already-loaded _reportData.members array by
+   admissionDate (client-side, no extra Firestore query).
+   Downloads as CSV or XLS.
+═══════════════════════════════════════════════════════════ */
+
+window.dlAdmissionRange = function (btn, format) {
+  var startEl = getEl("adm-range-start");
+  var endEl   = getEl("adm-range-end");
+
+  if (!startEl || !endEl) { showToast("Error", "Date inputs not found", "error"); return; }
+
+  var start = startEl.value;
+  var end   = endEl.value;
+
+  if (!start || !end) {
+    showToast("Select dates", "Please choose both a start and end date", "warning");
+    return;
+  }
+  if (start > end) {
+    showToast("Invalid range", "Start date must be before end date", "warning");
+    return;
+  }
+  if (!window._reportData || !window._reportData.members) {
+    showToast("Data not ready", "Please wait for the report to finish loading", "warning");
+    return;
+  }
+
+  setButtonLoading(btn, true);
+
+  // Filter members whose admissionDate falls within the selected range.
+  // admissionDate is stored as "YYYY-MM-DD" — ISO string comparison is correct.
+  var filtered = window._reportData.members.filter(function (m) {
+    var adm = m.admissionDate || "";
+    return adm >= start && adm <= end;
+  });
+
+  if (!filtered.length) {
+    setButtonLoading(btn, false);
+    showToast("No records", "No members with admission dates in this range", "info");
+    return;
+  }
+
+  // Sort by admission date ascending
+  filtered.sort(function (a, b) {
+    return (a.admissionDate || "") < (b.admissionDate || "") ? -1 : 1;
+  });
+
+  var header = ["Member Name", "Phone", "Admission Date", "Expiry Date", "Status"];
+  var rows   = filtered.map(function (m) {
+    return [
+      m.name             || "",
+      m.phone            || "",
+      m.admissionDate    || "",
+      m.expiryDate       || "",
+      isExpired(m.expiryDate) ? "Expired" : "Active"
+    ];
+  });
+
+  var filename = "snfitness_admissions_" + start + "_to_" + end;
+
+  if (format === "csv") {
+    dlBlob(toCSV([header].concat(rows)), filename + ".csv", "text/csv");
+    showToast("Downloaded", filename + ".csv (" + filtered.length + " members)", "success");
+  } else if (format === "xls") {
+    dlBlob(toXLS([header].concat(rows)), filename + ".xls", "application/vnd.ms-excel");
+    showToast("Downloaded", filename + ".xls (" + filtered.length + " members)", "success");
+  } else if (format === "pdf") {
+    _makeReportPDF(
+      "SN.Fitness — Admission Report",
+      "Period: " + fmtDate(start) + "  →  " + fmtDate(end) + "   |   Members: " + filtered.length,
+      header, rows, filename + ".pdf"
+    );
+    showToast("Downloaded", filename + ".pdf (" + filtered.length + " members)", "success");
+  }
+
+  setButtonLoading(btn, false);
+};
 
 document.addEventListener("DOMContentLoaded", function () {
   // ── Mobile sidebar toggle ───────────────────────────────

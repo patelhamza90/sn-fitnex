@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SN.Fitnex — Members</title>
+  <title>SN.Fitness — Members</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -18,8 +17,8 @@
 <div class="shell">
   <aside class="sidebar">
     <div class="sb-logo">
-      <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitnex">
-      <div class="sb-logo-text"><h2>SN.Fitnex</h2><span>Management</span></div>
+      <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitness">
+      <div class="sb-logo-text"><h2>SN.Fitness</h2><span>Management</span></div>
     </div>
     <nav class="sb-nav">
       <div class="sb-section-label">Main Menu</div>
@@ -166,24 +165,6 @@
       <button class="btn btn-success" onclick="document.getElementById('renew-form').requestSubmit()">
         <i class="fa-solid fa-rotate"></i> Renew Plan
       </button>
-    </div>
-  </div>
-</div>
-
-<!-- QR Modal -->
-<div class="overlay" id="qr-overlay">
-  <div class="modal" style="max-width:360px">
-    <div class="modal-head">
-      <div class="modal-head-left"><h3>Member QR Code</h3><p>Scan at the attendance scanner</p></div>
-      <button class="modal-x" id="qr-close"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="qr-display-wrap">
-        <div class="qr-frame"><div id="qr-code-box"></div></div>
-        <div style="font-size:16px;font-weight:700;color:var(--t1)" id="qr-name"></div>
-        <div style="font-size:13px;color:var(--t3);margin-top:3px" id="qr-phone"></div>
-        <p style="font-size:12px;color:var(--t4);margin-top:10px;text-align:center;max-width:220px">Print or show this QR code at the scanner</p>
-      </div>
     </div>
   </div>
 </div>
