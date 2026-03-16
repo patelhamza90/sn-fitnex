@@ -1,5 +1,5 @@
 // ============================================================
-//  SN.Fitness — Main Application JavaScript
+//  SN.Fitnex — Main Application JavaScript
 //  Single file. No imports. Uses Firebase Compat SDK (global).
 //  Works with file:// and HTTP both.
 //
@@ -1626,7 +1626,7 @@ window.dlMembersPDF = function (btn) {
   var rows = data.members.map(function (m) {
     return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate||"", m.expiryDate||"", isExpired(m.expiryDate)?"Expired":"Active", data.attendance.filter(function(a){return a.memberId===m.id;}).length];
   });
-  _makeReportPDF("SN.Fitness — Members Report",
+  _makeReportPDF("SN.Fitnex — Members Report",
     "Total members: " + data.members.length,
     header, rows, "snfitness_members.pdf");
   showToast("Downloaded", "snfitness_members.pdf", "success");
@@ -1664,7 +1664,7 @@ window.dlAttPDF = function (btn) {
   var rows = window._reportData.attendance.map(function (a) {
     return [a.date||"", a.memberName||"Unknown", a.phone||"", fmtTime(a.checkedInAt)];
   });
-  _makeReportPDF("SN.Fitness — Attendance Report",
+  _makeReportPDF("SN.Fitnex — Attendance Report",
     "All-time check-ins: " + rows.length,
     header, rows, "snfitness_attendance.pdf");
   showToast("Downloaded", "snfitness_attendance.pdf", "success");
@@ -1694,7 +1694,7 @@ window.dlFullPDF = function (btn) {
     var mAtt = data.attendance.filter(function(a){return a.memberId===m.id;}).sort(function(a,b){return(b.checkedInAt&&b.checkedInAt.seconds||0)-(a.checkedInAt&&a.checkedInAt.seconds||0);});
     return [m.name, m.phone, isExpired(m.expiryDate)?"Expired":"Active", m.admissionDate||"", m.expiryDate||"", mAtt.length, mAtt[0]?fmtDate(mAtt[0].date):"Never"];
   });
-  _makeReportPDF("SN.Fitness — Full Combined Report",
+  _makeReportPDF("SN.Fitnex — Full Combined Report",
     "Members: " + data.members.length + "  |  All-time check-ins: " + data.attendance.length,
     header, rows, "snfitness_full_report.pdf");
   showToast("Downloaded", "snfitness_full_report.pdf", "success");
@@ -1793,7 +1793,7 @@ window.downloadAdmissionPDF = function () {
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255);
-  doc.text("SN.Fitness", W / 2, 10, { align: "center" });
+  doc.text("SN.Fitnex", W / 2, 10, { align: "center" });
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text("Membership Admission Card", W / 2, 17, { align: "center" });
@@ -1969,7 +1969,7 @@ window.dlAdmissionRange = function (btn, format) {
     showToast("Downloaded", filename + ".xls (" + filtered.length + " members)", "success");
   } else if (format === "pdf") {
     _makeReportPDF(
-      "SN.Fitness — Admission Report",
+      "SN.Fitnex — Admission Report",
       "Period: " + fmtDate(start) + "  →  " + fmtDate(end) + "   |   Members: " + filtered.length,
       header, rows, filename + ".pdf"
     );
