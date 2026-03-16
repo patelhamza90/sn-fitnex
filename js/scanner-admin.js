@@ -5,8 +5,7 @@
 // ============================================================
 
 function getAttendanceUrl() {
-  // Strips the current filename and builds the attendance.html URL.
-  // Works for: file://, http://localhost/, https://yoursite.web.app/
+  
   var href = window.location.href.split("?")[0];
   var base = href.substring(0, href.lastIndexOf("/") + 1);
   return base + "attendance.html";

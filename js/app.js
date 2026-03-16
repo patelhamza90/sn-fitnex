@@ -1,13 +1,3 @@
-// ============================================================
-//  SN.Fitnex — Main Application JavaScript
-//  Single file. No imports. Uses Firebase Compat SDK (global).
-//  Works with file:// and HTTP both.
-//
-//  Photo uploads: Cloudinary (uploadToCloudinary — from cloudinary-config.js)
-//  Auth + Data:   Firebase Auth + Firestore
-//  Storage:       Firebase Storage REMOVED
-// ============================================================
-
 /* ═══════════════════════════════════════════════════════════
    UTILITY HELPERS
 ═══════════════════════════════════════════════════════════ */
@@ -60,9 +50,9 @@ function getEl(id) { return document.getElementById(id); }
 
 const TOAST_ICONS = {
   success: '<i class="fa-solid fa-circle-check"></i>',
-  error:   '<i class="fa-solid fa-circle-xmark"></i>',
+  error: '<i class="fa-solid fa-circle-xmark"></i>',
   warning: '<i class="fa-solid fa-triangle-exclamation"></i>',
-  info:    '<i class="fa-solid fa-circle-info"></i>'
+  info: '<i class="fa-solid fa-circle-info"></i>'
 };
 
 function showToast(title, text, type) {
@@ -168,7 +158,7 @@ function memberAvatarHTML(member, size) {
 function setAdminUI(user) {
   if (!user) return;
   var initial = (user.email || "A").charAt(0).toUpperCase();
-  var name    = (user.email || "Admin").split("@")[0];
+  var name = (user.email || "Admin").split("@")[0];
   document.querySelectorAll(".topbar-avatar").forEach(function (el) { el.textContent = initial; });
   document.querySelectorAll(".sb-avatar").forEach(function (el) { el.textContent = initial; });
   document.querySelectorAll(".sb-profile-info h4").forEach(function (el) { el.textContent = name; });
@@ -203,11 +193,11 @@ function setAdminUI(user) {
 ═══════════════════════════════════════════════════════════ */
 
 var _ADMIN_CACHE_KEY = "snf_admin_ok";
-var _authUser        = null;   // the resolved Firebase user (or null)
-var _authReady       = null;   // Promise that resolves once auth state is known
+var _authUser = null;   // the resolved Firebase user (or null)
+var _authReady = null;   // Promise that resolves once auth state is known
 
 function _setCachedAdmin(uid, email) {
-  try { sessionStorage.setItem(_ADMIN_CACHE_KEY, JSON.stringify({ uid: uid, email: email, ts: Date.now() })); } catch (_) {}
+  try { sessionStorage.setItem(_ADMIN_CACHE_KEY, JSON.stringify({ uid: uid, email: email, ts: Date.now() })); } catch (_) { }
 }
 function _getCachedAdmin() {
   try {
@@ -219,7 +209,7 @@ function _getCachedAdmin() {
   } catch (_) { return null; }
 }
 function _clearCachedAdmin() {
-  try { sessionStorage.removeItem(_ADMIN_CACHE_KEY); } catch (_) {}
+  try { sessionStorage.removeItem(_ADMIN_CACHE_KEY); } catch (_) { }
 }
 
 // ── Bootstrap: called once at page load ──────────────────
@@ -324,8 +314,8 @@ function bindLogout() {
     b.parentNode.replaceChild(nb, b);
     nb.addEventListener("click", function () {
       _clearCachedAdmin();
-      _authUser   = null;
-      _authReady  = null; // reset so next page starts fresh
+      _authUser = null;
+      _authReady = null; // reset so next page starts fresh
       auth.signOut().then(function () { window.location.href = "index.html"; });
     });
   });
@@ -339,8 +329,8 @@ function renderAlerts(containerId, members) {
   var container = document.getElementById(containerId);
   if (!container) return;
   var expired = members.filter(function (m) { return isExpired(m.expiryDate); });
-  var soon    = members.filter(function (m) { var d = daysLeft(m.expiryDate); return d >= 0 && d <= 3; });
-  var html    = "";
+  var soon = members.filter(function (m) { var d = daysLeft(m.expiryDate); return d >= 0 && d <= 3; });
+  var html = "";
 
   expired.forEach(function (m) {
     html += '<div class="alert-banner alert-expired">' +
@@ -378,7 +368,7 @@ function renderAlerts(containerId, members) {
 function initLogin() {
   // Reset auth state so _bootstrapAuth runs fresh on this page
   _authReady = null;
-  _authUser  = null;
+  _authUser = null;
 
   // If already logged in as a valid admin → go straight to dashboard
   // Uses _bootstrapAuth so we don't add another onAuthStateChanged listener
@@ -393,10 +383,10 @@ function initLogin() {
   if (loginForm) {
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      var email  = document.getElementById("lu").value.trim();
-      var pass   = document.getElementById("lp").value;
-      var errEl  = document.getElementById("lerr");
-      var btn    = loginForm.querySelector("button[type=submit]");
+      var email = document.getElementById("lu").value.trim();
+      var pass = document.getElementById("lp").value;
+      var errEl = document.getElementById("lerr");
+      var btn = loginForm.querySelector("button[type=submit]");
 
       if (!email || !pass) {
         errEl.classList.add("show");
@@ -415,7 +405,7 @@ function initLogin() {
         .then(function (cred) {
           // Store uid/email outside the chain so the next .then() can access them
           // (cred is NOT in scope in the next .then callback — this fixes "cred is not defined")
-          var uid       = cred.user.uid;
+          var uid = cred.user.uid;
           var userEmail = cred.user.email;
 
           return db.collection("admins").doc(uid).get()
@@ -434,7 +424,7 @@ function initLogin() {
           errEl.classList.add("show");
           var msg = err.message;
           if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" ||
-              err.code === "auth/invalid-credential" || err.code === "auth/invalid-email") {
+            err.code === "auth/invalid-credential" || err.code === "auth/invalid-email") {
             msg = "Incorrect email or password. Please try again.";
           } else if (err.code === "auth/too-many-requests") {
             msg = "Too many failed attempts. Please wait a moment and try again.";
@@ -447,15 +437,15 @@ function initLogin() {
   }
 
   // ── Forgot password panel toggle ─────────────────────────
-  var forgotLink  = document.getElementById("forgot-link");
+  var forgotLink = document.getElementById("forgot-link");
   var forgotPanel = document.getElementById("forgot-panel");
-  var loginWrap   = document.getElementById("login-form-wrap");
-  var backBtn     = document.getElementById("back-to-login");
+  var loginWrap = document.getElementById("login-form-wrap");
+  var backBtn = document.getElementById("back-to-login");
 
   if (forgotLink) {
     forgotLink.addEventListener("click", function (e) {
       e.preventDefault();
-      loginWrap.style.display  = "none";
+      loginWrap.style.display = "none";
       forgotPanel.style.display = "block";
     });
   }
@@ -463,7 +453,7 @@ function initLogin() {
     backBtn.addEventListener("click", function (e) {
       e.preventDefault();
       forgotPanel.style.display = "none";
-      loginWrap.style.display   = "block";
+      loginWrap.style.display = "block";
     });
   }
 
@@ -472,30 +462,30 @@ function initLogin() {
   if (forgotForm) {
     forgotForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      var email  = document.getElementById("reset-email").value.trim();
-      var msgEl  = document.getElementById("reset-msg");
-      var btn    = forgotForm.querySelector("button[type=submit]");
+      var email = document.getElementById("reset-email").value.trim();
+      var msgEl = document.getElementById("reset-msg");
+      var btn = forgotForm.querySelector("button[type=submit]");
 
       if (!email) {
-        msgEl.className   = "reset-error";
+        msgEl.className = "reset-error";
         msgEl.textContent = "Please enter your email address.";
         return;
       }
 
       setButtonLoading(btn, true);
-      msgEl.className   = "";
+      msgEl.className = "";
       msgEl.textContent = "";
 
       auth.sendPasswordResetEmail(email)
         .then(function () {
           setButtonLoading(btn, false);
-          msgEl.className   = "reset-success";
+          msgEl.className = "reset-success";
           msgEl.textContent = "✅ Password reset email sent! Check your inbox.";
           document.getElementById("reset-email").value = "";
         })
         .catch(function (err) {
           setButtonLoading(btn, false);
-          msgEl.className   = "reset-error";
+          msgEl.className = "reset-error";
           msgEl.textContent = "❌ " + err.message;
         });
     });
@@ -523,13 +513,13 @@ function initDashboard() {
           return tb - ta;
         });
 
-        var today   = todayStr();
-        var total   = members.length;
-        var active  = members.filter(function (m) { return !isExpired(m.expiryDate); }).length;
-        var expired = members.filter(function (m) { return  isExpired(m.expiryDate); }).length;
+        var today = todayStr();
+        var total = members.length;
+        var active = members.filter(function (m) { return !isExpired(m.expiryDate); }).length;
+        var expired = members.filter(function (m) { return isExpired(m.expiryDate); }).length;
 
-        setText("sc-total",   total);
-        setText("sc-active",  active);
+        setText("sc-total", total);
+        setText("sc-active", active);
         setText("sc-expired", expired);
 
         renderAlerts("dash-alerts", members);
@@ -554,7 +544,7 @@ function initDashboard() {
 
         // Today's attendance — use where() range, then sort client-side
         var dayStart = new Date(today + "T00:00:00");
-        var dayEnd   = new Date(today + "T23:59:59");
+        var dayEnd = new Date(today + "T23:59:59");
         return db.collection("attendance")
           .where("checkedInAt", ">=", firebase.firestore.Timestamp.fromDate(dayStart))
           .where("checkedInAt", "<=", firebase.firestore.Timestamp.fromDate(dayEnd))
@@ -598,8 +588,8 @@ function initDashboard() {
 ═══════════════════════════════════════════════════════════ */
 
 var _allMembers = [];
-var _editId     = null;
-var _photoFile  = null;
+var _editId = null;
+var _photoFile = null;
 
 function initMembers() {
   requireAuth(function () {
@@ -641,7 +631,7 @@ function refreshMembers() {
           '<div class="es-icon" style="color:var(--red)"><i class="fa-solid fa-circle-xmark"></i></div>' +
           '<h3>Failed to load members</h3>' +
           '<p style="color:var(--red);font-size:12px;margin-bottom:4px;font-family:monospace">' +
-            (err.code ? '[' + err.code + '] ' : '') + err.message +
+          (err.code ? '[' + err.code + '] ' : '') + err.message +
           '</p>' +
           '<p style="font-size:12px;color:var(--t3);margin-bottom:16px">Check browser console for details.</p>' +
           '<button class="btn btn-primary btn-sm" onclick="refreshMembers()"><i class="fa-solid fa-rotate-right"></i> Try Again</button>' +
@@ -652,12 +642,12 @@ function refreshMembers() {
 }
 
 function applyMemberFilters() {
-  var q  = (getEl("search-input") ? getEl("search-input").value : "").toLowerCase();
+  var q = (getEl("search-input") ? getEl("search-input").value : "").toLowerCase();
   var st = getEl("status-filter") ? getEl("status-filter").value : "all";
   var filtered = _allMembers.filter(function (m) {
-    var mq  = !q || m.name.toLowerCase().includes(q) || m.phone.includes(q);
+    var mq = !q || m.name.toLowerCase().includes(q) || m.phone.includes(q);
     var exp = isExpired(m.expiryDate);
-    var ms  = st === "all" || (st === "active" && !exp) || (st === "expired" && exp);
+    var ms = st === "all" || (st === "active" && !exp) || (st === "expired" && exp);
     return mq && ms;
   });
   var cntEl = getEl("member-count");
@@ -674,9 +664,9 @@ function renderMembersTable(filtered) {
   }
   tbody.innerHTML = filtered.map(function (m) {
     var exp = isExpired(m.expiryDate);
-    var dl  = daysLeft(m.expiryDate);
+    var dl = daysLeft(m.expiryDate);
     var dlColor = "var(--t4)", dlTxt = fmtDate(m.expiryDate);
-    if (exp)        { dlColor = "var(--red)";   dlTxt = "Expired " + Math.abs(dl) + "d ago"; }
+    if (exp) { dlColor = "var(--red)"; dlTxt = "Expired " + Math.abs(dl) + "d ago"; }
     else if (dl <= 3) { dlColor = "var(--amber)"; dlTxt = "Expires in " + dl + "d ⚠️"; }
     else if (dl <= 7) { dlColor = "var(--amber)"; dlTxt = dl + " days left"; }
 
@@ -687,15 +677,15 @@ function renderMembersTable(filtered) {
 
     return "<tr>" +
       "<td><div class='member-cell'>" + memberAvatarHTML(m, 36) +
-        "<div><div class='mc-name'>" + m.name + "</div><div class='mc-sub'>" + m.phone + "</div></div></div></td>" +
+      "<div><div class='mc-name'>" + m.name + "</div><div class='mc-sub'>" + m.phone + "</div></div></div></td>" +
       "<td class='hide-sm'>" + m.phone + "</td>" +
       "<td class='hide-sm'>" + fmtDate(m.admissionDate) + "</td>" +
       "<td><span style='font-size:12px;color:" + dlColor + "'>" + dlTxt + "</span></td>" +
       "<td><span class='badge " + badgeCls + "'><span class='badge-dot'></span>" + badgeTxt + "</span></td>" +
       "<td><div class='act-cell'>" +
-        "<button class='btn btn-secondary btn-sm' onclick='openEditModal(\"" + m.id + "\")'><i class='fa-solid fa-pen'></i><span class='btn-label'> Edit</span></button>" +
-        renewBtn +
-        "<button class='btn btn-danger btn-sm' onclick='confirmDelete(\"" + m.id + "\")'><i class='fa-solid fa-trash'></i></button>" +
+      "<button class='btn btn-secondary btn-sm' onclick='openEditModal(\"" + m.id + "\")'><i class='fa-solid fa-pen'></i><span class='btn-label'> Edit</span></button>" +
+      renewBtn +
+      "<button class='btn btn-danger btn-sm' onclick='confirmDelete(\"" + m.id + "\")'><i class='fa-solid fa-trash'></i></button>" +
       "</div></td></tr>";
   }).join("");
 }
@@ -713,14 +703,14 @@ function bindMembersEvents() {
   }
 
   if (getEl("member-form")) getEl("member-form").addEventListener("submit", handleSaveMember);
-  if (getEl("renew-form"))  getEl("renew-form").addEventListener("submit", handleRenew);
+  if (getEl("renew-form")) getEl("renew-form").addEventListener("submit", handleRenew);
 
   document.querySelectorAll(".rn-plan-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
       document.querySelectorAll(".rn-plan-btn").forEach(function (b) { b.classList.remove("sel"); });
       btn.classList.add("sel");
       var id = getEl("rn-member-id").value;
-      var m  = _allMembers.find(function (x) { return x.id === id; });
+      var m = _allMembers.find(function (x) { return x.id === id; });
       var base = (m && !isExpired(m.expiryDate)) ? new Date(m.expiryDate) : new Date();
       base.setMonth(base.getMonth() + parseInt(btn.dataset.months));
       getEl("rn-new-exp").value = base.toISOString().split("T")[0];
@@ -755,7 +745,7 @@ function openAddModal() {
   getEl("member-form").reset();
   getEl("pu-img").innerHTML = "👤";
   getEl("modal-title").textContent = "Add New Member";
-  getEl("modal-sub").textContent   = "Register a new gym member";
+  getEl("modal-sub").textContent = "Register a new gym member";
   getEl("m-adm").value = todayStr();
   getEl("member-overlay").classList.add("open");
 }
@@ -766,11 +756,11 @@ window.openEditModal = function (id) {
   _editId = id; _photoFile = null;
   getEl("member-form").reset();
   getEl("modal-title").textContent = "Edit Member";
-  getEl("modal-sub").textContent   = "Update member information";
-  getEl("m-name").value  = m.name;
+  getEl("modal-sub").textContent = "Update member information";
+  getEl("m-name").value = m.name;
   getEl("m-phone").value = m.phone;
-  getEl("m-adm").value   = m.admissionDate || "";
-  getEl("m-exp").value   = m.expiryDate    || "";
+  getEl("m-adm").value = m.admissionDate || "";
+  getEl("m-exp").value = m.expiryDate || "";
   var p = getEl("pu-img");
   p.innerHTML = m.photoURL ? '<img src="' + m.photoURL + '" alt="">' : "👤";
   getEl("member-overlay").classList.add("open");
@@ -778,11 +768,11 @@ window.openEditModal = function (id) {
 
 function handleSaveMember(e) {
   e.preventDefault();
-  var btn   = e.submitter || e.target.querySelector("button[type=submit]");
-  var name  = getEl("m-name").value.trim();
+  var btn = e.submitter || e.target.querySelector("button[type=submit]");
+  var name = getEl("m-name").value.trim();
   var phone = getEl("m-phone").value.trim();
-  var adm   = getEl("m-adm").value;
-  var exp   = getEl("m-exp").value;
+  var adm = getEl("m-adm").value;
+  var exp = getEl("m-exp").value;
 
   if (!name || !phone || !exp) { showToast("Missing fields", "Fill in name, phone and expiry date", "error"); return; }
   if (!/^\d{7,15}$/.test(phone)) { showToast("Invalid phone", "Enter 7–15 digits only", "error"); return; }
@@ -795,15 +785,17 @@ function handleSaveMember(e) {
     var dup = snap.docs.find(function (d) { return d.id !== _editId; });
     if (dup) { showToast("Phone already in use", "Used by " + dup.data().name, "error"); setButtonLoading(btn, false); return; }
 
-    var data = { name: name, phone: phone, admissionDate: adm, expiryDate: exp,
-                 updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    var data = {
+      name: name, phone: phone, admissionDate: adm, expiryDate: exp,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
 
     var savePromise;
     if (_editId) {
       savePromise = db.collection("members").doc(_editId).update(data);
     } else {
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      data.photoURL  = "";
+      data.photoURL = "";
       savePromise = db.collection("members").add(data).then(function (ref) {
         _editId = ref.id; return ref;
       });
@@ -855,8 +847,8 @@ window.openRenewModal = function (id) {
 
 function handleRenew(e) {
   e.preventDefault();
-  var id  = getEl("rn-member-id").value;
-  var nd  = getEl("rn-new-exp").value;
+  var id = getEl("rn-member-id").value;
+  var nd = getEl("rn-new-exp").value;
   var btn = e.submitter || e.target.querySelector("button[type=submit]");
   if (!nd) { showToast("Select a date", "", "error"); return; }
   setButtonLoading(btn, true);
@@ -872,7 +864,7 @@ function handleRenew(e) {
 window.openQRModal = function (id) {
   var m = _allMembers.find(function (x) { return x.id === id; });
   if (!m) return;
-  getEl("qr-name").textContent  = m.name;
+  getEl("qr-name").textContent = m.name;
   getEl("qr-phone").textContent = m.phone;
   var box = getEl("qr-code-box");
   box.innerHTML = "";
@@ -915,11 +907,11 @@ function initAddMember() {
     if (amForm) {
       amForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        var name  = getEl("am-name").value.trim();
+        var name = getEl("am-name").value.trim();
         var phone = getEl("am-phone").value.trim();
-        var adm   = getEl("am-adm").value;
-        var exp   = getEl("am-exp").value;
-        var btn   = e.submitter || amForm.querySelector("button[type=submit]");
+        var adm = getEl("am-adm").value;
+        var exp = getEl("am-exp").value;
+        var btn = e.submitter || amForm.querySelector("button[type=submit]");
 
         if (!name || !phone || !exp) { showToast("Missing fields", "Fill all required fields", "error"); return; }
         if (!/^\d{7,15}$/.test(phone)) { showToast("Invalid phone", "7–15 digits required", "error"); return; }
@@ -951,13 +943,13 @@ function initAddMember() {
             if (card && summary && _lastAddedMember) {
               summary.innerHTML =
                 '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
-                  (_lastAddedMember.photoURL
-                    ? '<img src="' + _lastAddedMember.photoURL + '" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--green-border)">'
-                    : '<div style="width:46px;height:46px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--green)">' +
-                        _lastAddedMember.name.trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase() +
-                      '</div>') +
-                  '<div><div style="font-weight:700;font-size:14px">' + _lastAddedMember.name + '</div>' +
-                  '<div style="font-size:12px;color:var(--t3)">' + _lastAddedMember.phone + '</div></div>' +
+                (_lastAddedMember.photoURL
+                  ? '<img src="' + _lastAddedMember.photoURL + '" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--green-border)">'
+                  : '<div style="width:46px;height:46px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--green)">' +
+                  _lastAddedMember.name.trim().split(/\s+/).map(function (w) { return w[0]; }).join("").slice(0, 2).toUpperCase() +
+                  '</div>') +
+                '<div><div style="font-weight:700;font-size:14px">' + _lastAddedMember.name + '</div>' +
+                '<div style="font-size:12px;color:var(--t3)">' + _lastAddedMember.phone + '</div></div>' +
                 '</div>' +
                 '<div style="color:var(--t3)"><i class="fa-solid fa-id-card" style="margin-right:5px"></i>ID: <strong style="color:var(--t1)">' + _lastAddedMember.id.slice(-8).toUpperCase() + '</strong></div>' +
                 '<div style="color:var(--t3)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>Admission: <strong style="color:var(--t1)">' + fmtDate(_lastAddedMember.admissionDate) + '</strong></div>' +
@@ -1043,7 +1035,7 @@ function adminManualCheckin(phone) {
         showToast("Member not found", phone, "error");
         return;
       }
-      var m   = Object.assign({ id: snap.docs[0].id }, snap.docs[0].data());
+      var m = Object.assign({ id: snap.docs[0].id }, snap.docs[0].data());
       var exp = isExpired(m.expiryDate);
 
       if (exp) {
@@ -1052,9 +1044,9 @@ function adminManualCheckin(phone) {
         return;
       }
 
-      var today    = todayStr();
+      var today = todayStr();
       var dayStart = new Date(today + "T00:00:00");
-      var dayEnd   = new Date(today + "T23:59:59");
+      var dayEnd = new Date(today + "T23:59:59");
 
       db.collection("attendance")
         .where("memberId", "==", m.id)
@@ -1099,15 +1091,15 @@ function processQR(phone) {
         _processing = false;
         return;
       }
-      var m   = Object.assign({ id: snap.docs[0].id }, snap.docs[0].data());
+      var m = Object.assign({ id: snap.docs[0].id }, snap.docs[0].data());
       var exp = isExpired(m.expiryDate);
-      var dl  = daysLeft(m.expiryDate);
+      var dl = daysLeft(m.expiryDate);
 
       if (!exp) {
         // Mark attendance
-        var today     = todayStr();
-        var dayStart  = new Date(today + "T00:00:00");
-        var dayEnd    = new Date(today + "T23:59:59");
+        var today = todayStr();
+        var dayStart = new Date(today + "T00:00:00");
+        var dayEnd = new Date(today + "T23:59:59");
         db.collection("attendance")
           .where("memberId", "==", m.id)
           .where("checkedInAt", ">=", firebase.firestore.Timestamp.fromDate(dayStart))
@@ -1143,7 +1135,7 @@ function showResultCard(el, m, exp, dl, status) {
   var photoHtml = m.photoURL ? '<img src="' + m.photoURL + '" alt="' + m.name + '">' :
     m.name.trim().split(/\s+/).map(function (w) { return w[0]; }).join("").slice(0, 2).toUpperCase();
   var bannerHtml = "";
-  if (status === "marked")  bannerHtml = '<div class="rc-banner ok"><i class="fa-solid fa-circle-check"></i> Attendance marked!</div>';
+  if (status === "marked") bannerHtml = '<div class="rc-banner ok"><i class="fa-solid fa-circle-check"></i> Attendance marked!</div>';
   if (status === "already") bannerHtml = '<div class="rc-banner already"><i class="fa-solid fa-clock"></i> Already checked in today</div>';
   if (status === "expired") bannerHtml = '<div class="rc-banner no"><i class="fa-solid fa-ban"></i> Plan expired — Not marked</div>';
 
@@ -1152,18 +1144,18 @@ function showResultCard(el, m, exp, dl, status) {
     '<div class="rc-head"><h3>Scan Result</h3><span class="badge ' + badgeCls + '"><span class="badge-dot"></span>' + badgeTxt + '</span></div>' +
     '<div class="rc-body"><div class="rc-profile"><div class="rc-photo">' + photoHtml + '</div><div class="rc-name">' + m.name + '</div></div>' +
     '<div class="rc-details">' +
-      '<div class="rc-row"><span class="rdl">Phone</span><span class="rdv">' + m.phone + '</span></div>' +
-      '<div class="rc-row"><span class="rdl">Member Since</span><span class="rdv">' + fmtDate(m.admissionDate) + '</span></div>' +
-      '<div class="rc-row"><span class="rdl">Plan Expiry</span><span class="rdv" style="color:' + (exp ? "var(--red)" : "var(--green)") + '">' + fmtDate(m.expiryDate) + '</span></div>' +
-      '<div class="rc-row"><span class="rdl">Days Remaining</span><span class="rdv">' + (exp ? '<span style="color:var(--red)">Expired</span>' : dl + " day" + (dl !== 1 ? "s" : "")) + '</span></div>' +
+    '<div class="rc-row"><span class="rdl">Phone</span><span class="rdv">' + m.phone + '</span></div>' +
+    '<div class="rc-row"><span class="rdl">Member Since</span><span class="rdv">' + fmtDate(m.admissionDate) + '</span></div>' +
+    '<div class="rc-row"><span class="rdl">Plan Expiry</span><span class="rdv" style="color:' + (exp ? "var(--red)" : "var(--green)") + '">' + fmtDate(m.expiryDate) + '</span></div>' +
+    '<div class="rc-row"><span class="rdl">Days Remaining</span><span class="rdv">' + (exp ? '<span style="color:var(--red)">Expired</span>' : dl + " day" + (dl !== 1 ? "s" : "")) + '</span></div>' +
     '</div>' + bannerHtml + '</div>';
 }
 
 function renderAttLog() {
   var el = getEl("att-log"); if (!el) return;
-  var today    = todayStr();
+  var today = todayStr();
   var dayStart = new Date(today + "T00:00:00");
-  var dayEnd   = new Date(today + "T23:59:59");
+  var dayEnd = new Date(today + "T23:59:59");
   // No orderBy() — avoids needing a Firestore composite index
   db.collection("attendance")
     .where("checkedInAt", ">=", firebase.firestore.Timestamp.fromDate(dayStart))
@@ -1195,9 +1187,9 @@ function renderAttLog() {
 }
 
 function updateTodayCount() {
-  var today    = todayStr();
+  var today = todayStr();
   var dayStart = new Date(today + "T00:00:00");
-  var dayEnd   = new Date(today + "T23:59:59");
+  var dayEnd = new Date(today + "T23:59:59");
   db.collection("attendance")
     .where("checkedInAt", ">=", firebase.firestore.Timestamp.fromDate(dayStart))
     .where("checkedInAt", "<=", firebase.firestore.Timestamp.fromDate(dayEnd))
@@ -1220,7 +1212,7 @@ function initReports() {
       db.collection("members").get(),
       db.collection("attendance").get()
     ]).then(function (results) {
-      var members    = results[0].docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+      var members = results[0].docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
       var attendance = results[1].docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
 
       // Sort client-side
@@ -1234,16 +1226,16 @@ function initReports() {
         var tb = b.checkedInAt ? b.checkedInAt.seconds : 0;
         return tb - ta;
       });
-      var today      = todayStr();
-      var now        = new Date();
+      var today = todayStr();
+      var now = new Date();
       var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
 
-      setText("rep-total",    members.length);
-      setText("rep-active",   members.filter(function (m) { return !isExpired(m.expiryDate); }).length);
-      setText("rep-expired",  members.filter(function (m) { return  isExpired(m.expiryDate); }).length);
-      setText("rep-today",    attendance.filter(function (a) { return a.date === today; }).length);
-      setText("rep-total-att",attendance.length);
-      setText("rep-month-att",attendance.filter(function (a) { return a.date >= monthStart; }).length);
+      setText("rep-total", members.length);
+      setText("rep-active", members.filter(function (m) { return !isExpired(m.expiryDate); }).length);
+      setText("rep-expired", members.filter(function (m) { return isExpired(m.expiryDate); }).length);
+      setText("rep-today", attendance.filter(function (a) { return a.date === today; }).length);
+      setText("rep-total-att", attendance.length);
+      setText("rep-month-att", attendance.filter(function (a) { return a.date >= monthStart; }).length);
 
       // Members stat panel
       var msEl = getEl("rep-members-stat");
@@ -1266,11 +1258,11 @@ function initReports() {
       if (asEl) {
         var uniqueDays = new Set(attendance.map(function (a) { return a.date; })).size;
         var rows2 = [
-          ["All-time Check-ins",     attendance.length],
-          ["This Month",             attendance.filter(function (a) { return a.date >= monthStart; }).length],
-          ["Today",                  attendance.filter(function (a) { return a.date === today; }).length],
-          ["Days with Attendance",   uniqueDays],
-          ["Avg Check-ins / Day",    uniqueDays > 0 ? (attendance.length / uniqueDays).toFixed(1) : 0],
+          ["All-time Check-ins", attendance.length],
+          ["This Month", attendance.filter(function (a) { return a.date >= monthStart; }).length],
+          ["Today", attendance.filter(function (a) { return a.date === today; }).length],
+          ["Days with Attendance", uniqueDays],
+          ["Avg Check-ins / Day", uniqueDays > 0 ? (attendance.length / uniqueDays).toFixed(1) : 0],
           ["Unique Members Visited", new Set(attendance.map(function (a) { return a.memberId; })).size]
         ];
         asEl.innerHTML = rows2.map(function (r) {
@@ -1285,35 +1277,35 @@ function initReports() {
       //    interactive table engine (search / filter / pagination / checkboxes)
       var today = todayStr();
       var _repRows = members.map(function (m) {
-        var exp      = isExpired(m.expiryDate);
-        var dl       = daysLeft(m.expiryDate);
-        var mAtt     = attendance.filter(function (a) { return a.memberId === m.id; });
-        var lastAtt  = mAtt.slice().sort(function (a, b) {
+        var exp = isExpired(m.expiryDate);
+        var dl = daysLeft(m.expiryDate);
+        var mAtt = attendance.filter(function (a) { return a.memberId === m.id; });
+        var lastAtt = mAtt.slice().sort(function (a, b) {
           return (b.checkedInAt && b.checkedInAt.seconds || 0) - (a.checkedInAt && a.checkedInAt.seconds || 0);
         })[0];
         var todayChk = attendance.some(function (a) { return a.memberId === m.id && a.date === today; });
         return {
-          id:        m.id,
-          name:      m.name,
-          phone:     m.phone,
-          exp:       exp,
-          dl:        dl,
+          id: m.id,
+          name: m.name,
+          phone: m.phone,
+          exp: exp,
+          dl: dl,
           admission: m.admissionDate,
-          expiry:    m.expiryDate,
-          visits:    mAtt.length,
-          lastDate:  lastAtt ? lastAtt.date : null,
-          todayChk:  todayChk,
-          photoURL:  m.photoURL || "",
+          expiry: m.expiryDate,
+          visits: mAtt.length,
+          lastDate: lastAtt ? lastAtt.date : null,
+          todayChk: todayChk,
+          photoURL: m.photoURL || "",
           // pre-built avatar HTML for fast re-render
           avatarHTML: memberAvatarHTML(m, 32)
         };
       });
 
       // Store globally so filter/pagination functions can access it
-      window._repAllRows     = _repRows;
+      window._repAllRows = _repRows;
       window._repFilteredRows = _repRows.slice();
-      window._repPage        = 1;
-      window._repSelected    = {};   // { rowId: true }
+      window._repPage = 1;
+      window._repSelected = {};   // { rowId: true }
 
       repRenderTable();
 
@@ -1333,14 +1325,14 @@ function initReports() {
 // Called by search input and status dropdown (oninput / onchange)
 window.repApplyFilters = function () {
   if (!window._repAllRows) return;
-  var q   = (getEl("rep-search")        ? getEl("rep-search").value.toLowerCase()        : "");
-  var st  = (getEl("rep-status-filter") ? getEl("rep-status-filter").value                : "all");
+  var q = (getEl("rep-search") ? getEl("rep-search").value.toLowerCase() : "");
+  var st = (getEl("rep-status-filter") ? getEl("rep-status-filter").value : "all");
 
   window._repFilteredRows = window._repAllRows.filter(function (r) {
-    var matchQ  = !q || r.name.toLowerCase().indexOf(q) !== -1 || r.phone.indexOf(q) !== -1;
+    var matchQ = !q || r.name.toLowerCase().indexOf(q) !== -1 || r.phone.indexOf(q) !== -1;
     var matchSt = st === "all" ||
-                  (st === "active"  && !r.exp) ||
-                  (st === "expired" &&  r.exp);
+      (st === "active" && !r.exp) ||
+      (st === "expired" && r.exp);
     return matchQ && matchSt;
   });
 
@@ -1351,19 +1343,19 @@ window.repApplyFilters = function () {
 
 // Renders the current page of filtered rows into the tbody + pagination bar
 function repRenderTable() {
-  var tbody    = getEl("rep-tbl-body");
+  var tbody = getEl("rep-tbl-body");
   if (!tbody) return;
 
-  var allRows  = window._repFilteredRows || [];
-  var perPage  = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
-  var page     = window._repPage || 1;
-  var total    = allRows.length;
-  var pages    = Math.max(1, Math.ceil(total / perPage));
+  var allRows = window._repFilteredRows || [];
+  var perPage = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
+  var page = window._repPage || 1;
+  var total = allRows.length;
+  var pages = Math.max(1, Math.ceil(total / perPage));
 
   // Clamp page to valid range
   if (page > pages) { page = pages; window._repPage = page; }
 
-  var start    = (page - 1) * perPage;
+  var start = (page - 1) * perPage;
   var pageRows = allRows.slice(start, start + perPage);
 
   // Count label
@@ -1386,16 +1378,16 @@ function repRenderTable() {
 
   // ── Build rows ─────────────────────────────────────────
   tbody.innerHTML = pageRows.map(function (r) {
-    var checked  = window._repSelected[r.id] ? " checked" : "";
-    var selCls   = window._repSelected[r.id] ? " row-selected" : "";
+    var checked = window._repSelected[r.id] ? " checked" : "";
+    var selCls = window._repSelected[r.id] ? " row-selected" : "";
     var badgeCls = r.exp ? "badge-inactive" : r.dl <= 3 ? "badge-warn" : "badge-active";
     var badgeTxt = r.exp ? "Expired" : r.dl <= 3 ? "Expiring" : "Active";
 
     return "<tr class='rep-row" + selCls + "' data-id='" + r.id + "'>" +
       "<td class='col-chk'><input type='checkbox' class='rep-row-chk'" + checked +
-        " onchange=\"repToggleRow('" + r.id + "',this)\"></td>" +
+      " onchange=\"repToggleRow('" + r.id + "',this)\"></td>" +
       "<td><div class='member-cell'>" + r.avatarHTML +
-        "<div><div class='mc-name'>" + r.name + "</div><div class='mc-sub'>" + r.phone + "</div></div></div></td>" +
+      "<div><div class='mc-name'>" + r.name + "</div><div class='mc-sub'>" + r.phone + "</div></div></div></td>" +
       "<td>" + fmtDate(r.admission) + "</td>" +
       "<td>" + fmtDate(r.expiry) + "</td>" +
       "<td><span class='badge " + badgeCls + "'><span class='badge-dot'></span>" + badgeTxt + "</span></td>" +
@@ -1408,7 +1400,7 @@ function repRenderTable() {
   // Sync select-all checkbox header state
   var chkAll = getEl("rep-chk-all");
   if (chkAll) {
-    chkAll.checked       = allPageSelected && pageRows.length > 0;
+    chkAll.checked = allPageSelected && pageRows.length > 0;
     chkAll.indeterminate = !allPageSelected && pageRows.some(function (r) { return window._repSelected[r.id]; });
   }
 
@@ -1418,16 +1410,16 @@ function repRenderTable() {
 
 // Renders the pagination controls
 function repRenderPagination(total, page, pages, perPage) {
-  var bar      = getEl("rep-pagination");
-  var infoEl   = getEl("rep-page-info");
-  var ctrlEl   = getEl("rep-page-controls");
+  var bar = getEl("rep-pagination");
+  var infoEl = getEl("rep-page-info");
+  var ctrlEl = getEl("rep-page-controls");
   if (!bar || !infoEl || !ctrlEl) return;
 
   if (total === 0) { bar.style.display = "none"; return; }
   bar.style.display = "";
 
   var start = (page - 1) * perPage + 1;
-  var end   = Math.min(page * perPage, total);
+  var end = Math.min(page * perPage, total);
   infoEl.textContent = "Showing " + start + "–" + end + " of " + total;
 
   // Build page number buttons (show max 5 around current)
@@ -1440,7 +1432,7 @@ function repRenderPagination(total, page, pages, perPage) {
 
   // Page number buttons
   var btnStart = Math.max(1, page - 2);
-  var btnEnd   = Math.min(pages, page + 2);
+  var btnEnd = Math.min(pages, page + 2);
   // Always show first page
   if (btnStart > 1) {
     html += "<button class='rep-page-btn' onclick='repGoPage(1)'>1</button>";
@@ -1468,7 +1460,7 @@ function repRenderPagination(total, page, pages, perPage) {
 window.repGoPage = function (n) {
   var allRows = window._repFilteredRows || [];
   var perPage = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
-  var pages   = Math.max(1, Math.ceil(allRows.length / perPage));
+  var pages = Math.max(1, Math.ceil(allRows.length / perPage));
   window._repPage = Math.max(1, Math.min(n, pages));
   repRenderTable();
   // Scroll table into view on page change
@@ -1489,13 +1481,13 @@ window.repToggleRow = function (id, chk) {
   // Update select-all checkbox state
   var allRows = window._repFilteredRows || [];
   var perPage = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
-  var page    = window._repPage || 1;
+  var page = window._repPage || 1;
   var pageRows = allRows.slice((page - 1) * perPage, page * perPage);
   var allPageSelected = pageRows.every(function (r) { return window._repSelected[r.id]; });
-  var anySelected     = pageRows.some(function (r) { return window._repSelected[r.id]; });
+  var anySelected = pageRows.some(function (r) { return window._repSelected[r.id]; });
   var chkAll = getEl("rep-chk-all");
   if (chkAll) {
-    chkAll.checked       = allPageSelected;
+    chkAll.checked = allPageSelected;
     chkAll.indeterminate = !allPageSelected && anySelected;
   }
   repUpdateSelectionBar();
@@ -1503,9 +1495,9 @@ window.repToggleRow = function (id, chk) {
 
 // Toggle all rows on the current page
 window.repToggleAll = function (chkAll) {
-  var allRows  = window._repFilteredRows || [];
-  var perPage  = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
-  var page     = window._repPage || 1;
+  var allRows = window._repFilteredRows || [];
+  var perPage = parseInt((getEl("rep-per-page") ? getEl("rep-per-page").value : "10"), 10) || 10;
+  var page = window._repPage || 1;
   var pageRows = allRows.slice((page - 1) * perPage, page * perPage);
   pageRows.forEach(function (r) {
     if (chkAll.checked) {
@@ -1525,7 +1517,7 @@ window.repClearSelection = function () {
 
 // Show / hide the selection info bar
 function repUpdateSelectionBar() {
-  var bar   = getEl("rep-selection-bar");
+  var bar = getEl("rep-selection-bar");
   var label = getEl("rep-selection-count");
   if (!bar) return;
   var count = Object.keys(window._repSelected).length;
@@ -1539,13 +1531,13 @@ function repUpdateSelectionBar() {
 
 function renderCalendar(attendance) {
   var container = getEl("att-calendar"); if (!container) return;
-  var attDates  = new Set(attendance.map(function (a) { return a.date; }));
-  var now       = new Date();
+  var attDates = new Set(attendance.map(function (a) { return a.date; }));
+  var now = new Date();
   var year = now.getFullYear(), month = now.getMonth();
-  var firstDay  = new Date(year, month, 1).getDay();
+  var firstDay = new Date(year, month, 1).getDay();
   var daysInMonth = new Date(year, month + 1, 0).getDate();
-  var todayD    = now.getDate();
-  var days      = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var todayD = now.getDate();
+  var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var html = '<div style="font-size:13px;font-weight:600;color:var(--t1);margin-bottom:12px">' +
     now.toLocaleDateString("en-IN", { month: "long", year: "numeric" }) + '</div>' +
     '<div class="cal-row">' + days.map(function (d) { return '<div class="cal-day-head">' + d + "</div>"; }).join("") + "</div>" +
@@ -1553,10 +1545,10 @@ function renderCalendar(attendance) {
   var count = firstDay;
   for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
   for (var d = 1; d <= daysInMonth; d++) {
-    var ds  = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-    var n   = attendance.filter(function (a) { return a.date === ds; }).length;
+    var ds = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+    var n = attendance.filter(function (a) { return a.date === ds; }).length;
     var cls = "cal-day" + (d === todayD ? " today" : attDates.has(ds) ? " has-att" : "");
-    html   += '<div class="' + cls + '" title="' + (n ? n + " check-in(s)" : ds) + '">' + d + "</div>";
+    html += '<div class="' + cls + '" title="' + (n ? n + " check-in(s)" : ds) + '">' + d + "</div>";
     count++;
     if (count % 7 === 0 && d < daysInMonth) html += '</div><div class="cal-row">';
   }
@@ -1596,9 +1588,9 @@ window.dlMembersCSV = function (btn) {
   if (!window._reportData) return;
   var data = window._reportData;
   setButtonLoading(btn, true);
-  var header = ["ID","Name","Phone","Admission Date","Expiry Date","Status","Total Visits"];
+  var header = ["ID", "Name", "Phone", "Admission Date", "Expiry Date", "Status", "Total Visits"];
   var rows = data.members.map(function (m) {
-    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate||"", m.expiryDate||"", isExpired(m.expiryDate)?"Expired":"Active", data.attendance.filter(function(a){return a.memberId===m.id;}).length];
+    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate || "", m.expiryDate || "", isExpired(m.expiryDate) ? "Expired" : "Active", data.attendance.filter(function (a) { return a.memberId === m.id; }).length];
   });
   dlBlob(toCSV([header].concat(rows)), "snfitness_members.csv", "text/csv");
   showToast("Downloaded", "snfitness_members.csv", "success");
@@ -1609,9 +1601,9 @@ window.dlMembersXLS = function (btn) {
   if (!window._reportData) return;
   var data = window._reportData;
   setButtonLoading(btn, true);
-  var header = ["ID","Name","Phone","Admission Date","Expiry Date","Status","Total Visits"];
+  var header = ["ID", "Name", "Phone", "Admission Date", "Expiry Date", "Status", "Total Visits"];
   var rows = data.members.map(function (m) {
-    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate||"", m.expiryDate||"", isExpired(m.expiryDate)?"Expired":"Active", data.attendance.filter(function(a){return a.memberId===m.id;}).length];
+    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate || "", m.expiryDate || "", isExpired(m.expiryDate) ? "Expired" : "Active", data.attendance.filter(function (a) { return a.memberId === m.id; }).length];
   });
   dlBlob(toXLS([header].concat(rows)), "snfitness_members.xls", "application/vnd.ms-excel");
   showToast("Downloaded", "snfitness_members.xls", "success");
@@ -1622,9 +1614,9 @@ window.dlMembersPDF = function (btn) {
   if (!window._reportData) return;
   var data = window._reportData;
   setButtonLoading(btn, true);
-  var header = ["ID","Name","Phone","Admission Date","Expiry Date","Status","Total Visits"];
+  var header = ["ID", "Name", "Phone", "Admission Date", "Expiry Date", "Status", "Total Visits"];
   var rows = data.members.map(function (m) {
-    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate||"", m.expiryDate||"", isExpired(m.expiryDate)?"Expired":"Active", data.attendance.filter(function(a){return a.memberId===m.id;}).length];
+    return [m.id.slice(-8).toUpperCase(), m.name, m.phone, m.admissionDate || "", m.expiryDate || "", isExpired(m.expiryDate) ? "Expired" : "Active", data.attendance.filter(function (a) { return a.memberId === m.id; }).length];
   });
   _makeReportPDF("SN.Fitnex — Members Report",
     "Total members: " + data.members.length,
@@ -1636,9 +1628,9 @@ window.dlMembersPDF = function (btn) {
 window.dlAttCSV = function (btn) {
   if (!window._reportData) return;
   setButtonLoading(btn, true);
-  var header = ["Date","Member Name","Phone","Check-in Time"];
+  var header = ["Date", "Member Name", "Phone", "Check-in Time"];
   var rows = window._reportData.attendance.map(function (a) {
-    return [a.date||"", a.memberName||"Unknown", a.phone||"", fmtTime(a.checkedInAt)];
+    return [a.date || "", a.memberName || "Unknown", a.phone || "", fmtTime(a.checkedInAt)];
   });
   dlBlob(toCSV([header].concat(rows)), "snfitness_attendance.csv", "text/csv");
   showToast("Downloaded", "snfitness_attendance.csv", "success");
@@ -1648,9 +1640,9 @@ window.dlAttCSV = function (btn) {
 window.dlAttXLS = function (btn) {
   if (!window._reportData) return;
   setButtonLoading(btn, true);
-  var header = ["Date","Member Name","Phone","Check-in Time"];
+  var header = ["Date", "Member Name", "Phone", "Check-in Time"];
   var rows = window._reportData.attendance.map(function (a) {
-    return [a.date||"", a.memberName||"Unknown", a.phone||"", fmtTime(a.checkedInAt)];
+    return [a.date || "", a.memberName || "Unknown", a.phone || "", fmtTime(a.checkedInAt)];
   });
   dlBlob(toXLS([header].concat(rows)), "snfitness_attendance.xls", "application/vnd.ms-excel");
   showToast("Downloaded", "snfitness_attendance.xls", "success");
@@ -1660,9 +1652,9 @@ window.dlAttXLS = function (btn) {
 window.dlAttPDF = function (btn) {
   if (!window._reportData) return;
   setButtonLoading(btn, true);
-  var header = ["Date","Member Name","Phone","Check-in Time"];
+  var header = ["Date", "Member Name", "Phone", "Check-in Time"];
   var rows = window._reportData.attendance.map(function (a) {
-    return [a.date||"", a.memberName||"Unknown", a.phone||"", fmtTime(a.checkedInAt)];
+    return [a.date || "", a.memberName || "Unknown", a.phone || "", fmtTime(a.checkedInAt)];
   });
   _makeReportPDF("SN.Fitnex — Attendance Report",
     "All-time check-ins: " + rows.length,
@@ -1675,10 +1667,10 @@ window.dlFullCSV = function (btn) {
   if (!window._reportData) return;
   var data = window._reportData;
   setButtonLoading(btn, true);
-  var header = ["Name","Phone","Status","Admission","Expiry","Total Visits","Last Visit"];
+  var header = ["Name", "Phone", "Status", "Admission", "Expiry", "Total Visits", "Last Visit"];
   var rows = data.members.map(function (m) {
-    var mAtt = data.attendance.filter(function(a){return a.memberId===m.id;}).sort(function(a,b){return(b.checkedInAt&&b.checkedInAt.seconds||0)-(a.checkedInAt&&a.checkedInAt.seconds||0);});
-    return [m.name, m.phone, isExpired(m.expiryDate)?"Expired":"Active", m.admissionDate||"", m.expiryDate||"", mAtt.length, mAtt[0]?fmtDate(mAtt[0].date):"Never"];
+    var mAtt = data.attendance.filter(function (a) { return a.memberId === m.id; }).sort(function (a, b) { return (b.checkedInAt && b.checkedInAt.seconds || 0) - (a.checkedInAt && a.checkedInAt.seconds || 0); });
+    return [m.name, m.phone, isExpired(m.expiryDate) ? "Expired" : "Active", m.admissionDate || "", m.expiryDate || "", mAtt.length, mAtt[0] ? fmtDate(mAtt[0].date) : "Never"];
   });
   dlBlob(toCSV([header].concat(rows)), "snfitness_full_report.csv", "text/csv");
   showToast("Downloaded", "snfitness_full_report.csv", "success");
@@ -1689,10 +1681,10 @@ window.dlFullPDF = function (btn) {
   if (!window._reportData) return;
   var data = window._reportData;
   setButtonLoading(btn, true);
-  var header = ["Name","Phone","Status","Admission","Expiry","Total Visits","Last Visit"];
+  var header = ["Name", "Phone", "Status", "Admission", "Expiry", "Total Visits", "Last Visit"];
   var rows = data.members.map(function (m) {
-    var mAtt = data.attendance.filter(function(a){return a.memberId===m.id;}).sort(function(a,b){return(b.checkedInAt&&b.checkedInAt.seconds||0)-(a.checkedInAt&&a.checkedInAt.seconds||0);});
-    return [m.name, m.phone, isExpired(m.expiryDate)?"Expired":"Active", m.admissionDate||"", m.expiryDate||"", mAtt.length, mAtt[0]?fmtDate(mAtt[0].date):"Never"];
+    var mAtt = data.attendance.filter(function (a) { return a.memberId === m.id; }).sort(function (a, b) { return (b.checkedInAt && b.checkedInAt.seconds || 0) - (a.checkedInAt && a.checkedInAt.seconds || 0); });
+    return [m.name, m.phone, isExpired(m.expiryDate) ? "Expired" : "Active", m.admissionDate || "", m.expiryDate || "", mAtt.length, mAtt[0] ? fmtDate(mAtt[0].date) : "Never"];
   });
   _makeReportPDF("SN.Fitnex — Full Combined Report",
     "Members: " + data.members.length + "  |  All-time check-ins: " + data.attendance.length,
@@ -1709,7 +1701,7 @@ function _makeReportPDF(title, subtitle, header, rows, filename) {
   var jsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF || null);
   if (!jsPDF) { showToast("PDF library not loaded", "Please refresh and try again", "error"); return; }
 
-  var doc   = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  var doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   var pageW = doc.internal.pageSize.getWidth();
 
   // Header band
@@ -1727,13 +1719,13 @@ function _makeReportPDF(title, subtitle, header, rows, filename) {
   // Table
   doc.autoTable({
     startY: 24,
-    head:   [header],
-    body:   rows,
-    theme:  "striped",
-    headStyles:          { fillColor: [67, 97, 238], textColor: 255, fontStyle: "bold", fontSize: 9 },
-    bodyStyles:          { fontSize: 8, textColor: [40, 40, 40] },
-    alternateRowStyles:  { fillColor: [245, 246, 250] },
-    margin:              { left: 12, right: 12 },
+    head: [header],
+    body: rows,
+    theme: "striped",
+    headStyles: { fillColor: [67, 97, 238], textColor: 255, fontStyle: "bold", fontSize: 9 },
+    bodyStyles: { fontSize: 8, textColor: [40, 40, 40] },
+    alternateRowStyles: { fillColor: [245, 246, 250] },
+    margin: { left: 12, right: 12 },
     didDrawPage: function (data) {
       var n = doc.internal.getNumberOfPages();
       doc.setFontSize(7.5);
@@ -1747,7 +1739,7 @@ function _makeReportPDF(title, subtitle, header, rows, filename) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  FEATURE 1 — ADMISSION PDF DOWNLOAD
+     FEATURE 1 — ADMISSION PDF DOWNLOAD
    Uses jsPDF (loaded in add-member.html).
    Reads _lastAddedMember set by initAddMember on save.
 ═══════════════════════════════════════════════════════════ */
@@ -1761,10 +1753,10 @@ window.downloadAdmissionPDF = function () {
   if (!jsPDF) { showToast("PDF library not loaded", "Please refresh and try again", "error"); return; }
 
   var doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
-  var W   = doc.internal.pageSize.getWidth();   // A5 = 148 mm
-  var y   = 0;  // current Y cursor
+  var W = doc.internal.pageSize.getWidth();   // A5 = 148 mm
+  var y = 0;  // current Y cursor
 
-  // ── Helpers ──────────────────────────────────────────────
+  //  Helpers 
   function line(text, fontSize, fontStyle, color, align, yPos) {
     doc.setFontSize(fontSize || 12);
     doc.setFont("helvetica", fontStyle || "normal");
@@ -1787,8 +1779,8 @@ window.downloadAdmissionPDF = function () {
     doc.text(value || "—", 55, yPos);
   }
 
-  // ── Header band ───────────────────────────────────────────
-  doc.setFillColor(67, 97, 238);          // brand colour
+  //  Header
+  doc.setFillColor(67, 97, 238);        
   doc.rect(0, 0, W, 24, "F");
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
@@ -1800,7 +1792,7 @@ window.downloadAdmissionPDF = function () {
 
   y = 32;
 
-  // ── Photo or avatar circle ────────────────────────────────
+  //  Photo or avatar circle 
   var photoLoaded = false;
   function renderBody() {
     // Member name
@@ -1820,10 +1812,10 @@ window.downloadAdmissionPDF = function () {
 
     // Details
     var rows = [
-      ["Member ID",      m.id.slice(-8).toUpperCase()],
-      ["Phone Number",   m.phone],
+      ["Member ID", m.id.slice(-8).toUpperCase()],
+      ["Phone Number", m.phone],
       ["Admission Date", fmtDate(m.admissionDate)],
-      ["Plan Expiry",    fmtDate(m.expiryDate)]
+      ["Plan Expiry", fmtDate(m.expiryDate)]
     ];
     rows.forEach(function (r) {
       labelValue(r[0], r[1], y);
@@ -1850,7 +1842,7 @@ window.downloadAdmissionPDF = function () {
     y += 5;
     doc.text("Printed on " + new Date().toLocaleDateString("en-IN"), W / 2, y, { align: "center" });
 
-    // ── Bottom accent line ────────────────────────────────────
+    // Bottom accent line 
     doc.setFillColor(67, 97, 238);
     doc.rect(0, doc.internal.pageSize.getHeight() - 6, W, 6, "F");
 
@@ -1867,7 +1859,7 @@ window.downloadAdmissionPDF = function () {
         // Draw circular clip using canvas
         var size = 28; // mm diameter
         var canvas = document.createElement("canvas");
-        var px = Math.round(size * 3.78); // 1mm ≈ 3.78px at 96dpi
+        var px = Math.round(size * 3.78); 
         canvas.width = px; canvas.height = px;
         var ctx = canvas.getContext("2d");
         ctx.beginPath();
@@ -1885,8 +1877,8 @@ window.downloadAdmissionPDF = function () {
     img.onerror = function () { renderBody(); }; // photo failed to load
     img.src = m.photoURL;
   } else {
-    // Draw initials circle
-    var initials = m.name.trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
+    
+    var initials = m.name.trim().split(/\s+/).map(function (w) { return w[0]; }).join("").slice(0, 2).toUpperCase();
     var cx = W / 2, cy = y + 14, r = 14;
     doc.setFillColor(238, 240, 253); // brand-light
     doc.circle(cx, cy, r, "F");
@@ -1908,12 +1900,12 @@ window.downloadAdmissionPDF = function () {
 
 window.dlAdmissionRange = function (btn, format) {
   var startEl = getEl("adm-range-start");
-  var endEl   = getEl("adm-range-end");
+  var endEl = getEl("adm-range-end");
 
   if (!startEl || !endEl) { showToast("Error", "Date inputs not found", "error"); return; }
 
   var start = startEl.value;
-  var end   = endEl.value;
+  var end = endEl.value;
 
   if (!start || !end) {
     showToast("Select dates", "Please choose both a start and end date", "warning");
@@ -1949,12 +1941,12 @@ window.dlAdmissionRange = function (btn, format) {
   });
 
   var header = ["Member Name", "Phone", "Admission Date", "Expiry Date", "Status"];
-  var rows   = filtered.map(function (m) {
+  var rows = filtered.map(function (m) {
     return [
-      m.name             || "",
-      m.phone            || "",
-      m.admissionDate    || "",
-      m.expiryDate       || "",
+      m.name || "",
+      m.phone || "",
+      m.admissionDate || "",
+      m.expiryDate || "",
       isExpired(m.expiryDate) ? "Expired" : "Active"
     ];
   });
@@ -1981,22 +1973,22 @@ window.dlAdmissionRange = function (btn, format) {
 
 document.addEventListener("DOMContentLoaded", function () {
   // ── Mobile sidebar toggle ───────────────────────────────
-  var toggle   = document.getElementById("menu-toggle");
-  var sidebar  = document.querySelector(".sidebar");
+  var toggle = document.getElementById("menu-toggle");
+  var sidebar = document.querySelector(".sidebar");
   var backdrop = document.getElementById("sidebar-backdrop");
 
   function openSidebar() {
-    if (sidebar)  sidebar.classList.add("open");
+    if (sidebar) sidebar.classList.add("open");
     if (backdrop) backdrop.classList.add("visible");
     document.body.style.overflow = "hidden";
   }
   function closeSidebar() {
-    if (sidebar)  sidebar.classList.remove("open");
+    if (sidebar) sidebar.classList.remove("open");
     if (backdrop) backdrop.classList.remove("visible");
     document.body.style.overflow = "";
   }
 
-  if (toggle)   toggle.addEventListener("click", openSidebar);
+  if (toggle) toggle.addEventListener("click", openSidebar);
   if (backdrop) backdrop.addEventListener("click", closeSidebar);
 
   // Close sidebar on nav link click (mobile)
@@ -2006,11 +1998,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ── Page init ───────────────────────────────────────────
   var page = location.pathname.split("/").pop() || "index.html";
-  if (page === "" || page === "index.html")    initLogin();
-  if (page === "dashboard.html")               initDashboard();
-  if (page === "members.html")                 initMembers();
-  if (page === "add-member.html")              initAddMember();
-  if (page === "scanner.html")                 initScanner();
-  if (page === "reports.html")                 initReports();
+  if (page === "" || page === "index.html") initLogin();
+  if (page === "dashboard.html") initDashboard();
+  if (page === "members.html") initMembers();
+  if (page === "add-member.html") initAddMember();
+  if (page === "scanner.html") initScanner();
+  if (page === "reports.html") initReports();
   // attendance.html is fully self-contained in js/attendance-public.js — no init needed here
 });
+
+// ============================================================
+//  SN.Fitnex — Main Application JavaScript
+//  Single file. No imports. Uses Firebase Compat SDK (global).
+//  Works with file:// and HTTP both.
+//
+//  Photo uploads: Cloudinary (uploadToCloudinary — from cloudinary-config.js)
+//  Auth + Data:   Firebase Auth + Firestore
+//  Storage:       Firebase Storage REMOVED
+// ============================================================

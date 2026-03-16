@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,157 +8,203 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- jsPDF — client-side PDF generation for admission card -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
 
-<div id="page-loader" style="display:none"><div class="loader-inner"><div class="loader-spinner"></div><span id="loader-msg">Loading…</span></div></div>
-<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-
-<div class="shell">
-  <aside class="sidebar">
-    <div class="sb-logo">
-      <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitnex">
-      <div class="sb-logo-text"><h2>SN.Fitnex</h2><span>Management</span></div>
+  <div id="page-loader" style="display:none">
+    <div class="loader-inner">
+      <div class="loader-spinner"></div><span id="loader-msg">Loading…</span>
     </div>
-    <nav class="sb-nav">
-      <div class="sb-section-label">Main Menu</div>
-      <a href="dashboard.html"  class="nav-link"><div class="nav-icon"><i class="fa-solid fa-chart-column"></i></div> Dashboard</a>
-      <a href="members.html"    class="nav-link"><div class="nav-icon"><i class="fa-solid fa-user-group"></i></div> Members</a>
-      <a href="add-member.html" class="nav-link"><div class="nav-icon"><i class="fa-solid fa-user-plus"></i></div> Add Member</a>
-      <a href="scanner.html"    class="nav-link"><div class="nav-icon"><i class="fa-solid fa-clipboard-user"></i></div> Attendance</a>
-      <a href="reports.html"    class="nav-link"><div class="nav-icon"><i class="fa-solid fa-chart-bar"></i></div> Reports</a>
-    </nav>
-    <div class="sb-footer">
-      <div class="sb-profile">
-        <div class="sb-avatar">A</div>
-        <div class="sb-profile-info"><h4>Admin</h4><p>Loading…</p></div>
-      </div>
-      <button class="btn-logout logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
-    </div>
-  </aside>
+  </div>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <div class="topbar-title">Add Member</div>
-        <div class="topbar-sub">Register a new gym member</div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sb-logo">
+        <img src="logo.jpeg" class="login-brand-icon" alt="SN.Fitnex">
+        <div class="sb-logo-text">
+          <h2>SN.Fitnex</h2><span>Management</span>
+        </div>
       </div>
-      <div class="topbar-right">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
-        <div class="topbar-date" id="date-badge"></div>
-        <a href="members.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> All Members</a>
-        <div class="topbar-avatar">A</div>
-      </div>
-    </header>
-
-    <div class="page">
-      <div class="add-layout">
-        <div class="card">
-          <div class="card-head">
-            <div class="card-head-left"><h2>Member Information</h2><p>Fill in the details to register</p></div>
-          </div>
-          <div class="card-body">
-            <div class="photo-uploader">
-              <div class="pu-preview" id="am-pu-img">👤</div>
-              <div class="pu-info">
-                <p>Profile Photo <span style="color:var(--t4)">(optional)</span></p>
-                <label class="btn btn-secondary btn-sm" style="cursor:pointer;display:inline-flex;margin-bottom:4px">
-                  <i class="fa-solid fa-camera"></i> Choose Photo
-                  <input type="file" id="am-photo" accept="image/*" style="display:none">
-                </label><br><span>JPG or PNG, max 2MB</span>
-              </div>
-            </div>
-            <form id="am-form">
-              <div class="fg">
-                <label>Full Name <span style="color:var(--red)">*</span></label>
-                <input type="text" id="am-name" class="fc" placeholder="Enter member's full name" required>
-              </div>
-              <div class="fg">
-                <label>Phone Number <span style="color:var(--red)">*</span>
-                  <span style="font-size:11px;color:var(--t4);font-weight:400;margin-left:4px">Used as QR identifier — must be unique</span>
-                </label>
-                <input type="tel" id="am-phone" class="fc" placeholder="e.g. 9876543210" required>
-              </div>
-              <div class="form-2col">
-                <div class="fg"><label>Admission Date</label><input type="date" id="am-adm" class="fc"></div>
-                <div class="fg"><label>Plan Expiry Date <span style="color:var(--red)">*</span></label><input type="date" id="am-exp" class="fc" required></div>
-              </div>
-              <div style="display:flex;gap:10px;margin-top:8px">
-                <a href="members.html" class="btn btn-secondary" style="flex:1;justify-content:center">Cancel</a>
-                <button type="submit" class="btn btn-primary" style="flex:2">
-                  <i class="fa-solid fa-user-plus"></i> Register Member
-                </button>
-              </div>
-            </form>
+      <nav class="sb-nav">
+        <div class="sb-section-label">Main Menu</div>
+        <a href="dashboard.html" class="nav-link">
+          <div class="nav-icon"><i class="fa-solid fa-chart-column"></i></div> Dashboard
+        </a>
+        <a href="members.html" class="nav-link">
+          <div class="nav-icon"><i class="fa-solid fa-user-group"></i></div> Members
+        </a>
+        <a href="add-member.html" class="nav-link">
+          <div class="nav-icon"><i class="fa-solid fa-user-plus"></i></div> Add Member
+        </a>
+        <a href="scanner.html" class="nav-link">
+          <div class="nav-icon"><i class="fa-solid fa-clipboard-user"></i></div> Attendance
+        </a>
+        <a href="reports.html" class="nav-link">
+          <div class="nav-icon"><i class="fa-solid fa-chart-bar"></i></div> Reports
+        </a>
+      </nav>
+      <div class="sb-footer">
+        <div class="sb-profile">
+          <div class="sb-avatar">A</div>
+          <div class="sb-profile-info">
+            <h4>Admin</h4>
+            <p>Loading…</p>
           </div>
         </div>
+        <button class="btn-logout logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+      </div>
+    </aside>
 
-        <div style="display:flex;flex-direction:column;gap:16px">
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="topbar-title">Add Member</div>
+          <div class="topbar-sub">Register a new gym member</div>
+        </div>
+        <div class="topbar-right">
+          <button class="menu-toggle" id="menu-toggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <div class="topbar-date" id="date-badge"></div>
+          <a href="members.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> All Members</a>
+          <div class="topbar-avatar">A</div>
+        </div>
+      </header>
 
-          <!-- ── Admission success card — hidden until a member is saved ── -->
-          <div class="card" id="am-success-card" style="display:none;border:1.5px solid var(--green-border)">
-            <div class="card-head" style="background:var(--green-bg);border-bottom:1px solid var(--green-border)">
-              <div class="card-head-left">
-                <h2 style="color:var(--green)"><i class="fa-solid fa-circle-check"></i> Member Registered!</h2>
-                <p style="color:var(--green)">Download their admission details as a PDF</p>
-              </div>
-            </div>
-            <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
-              <!-- Member summary shown here after save -->
-              <div id="am-success-summary" style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;line-height:1.8"></div>
-              <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="downloadAdmissionPDF()">
-                <i class="fa-solid fa-file-pdf"></i> Download Admission PDF
-              </button>
-              <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center" onclick="document.getElementById('am-success-card').style.display='none'">
-                <i class="fa-solid fa-xmark"></i> Dismiss
-              </button>
-            </div>
-          </div>
+      <div class="page">
+        <div class="add-layout">
           <div class="card">
             <div class="card-head">
-              <div class="card-head-left"><h2><i class="fa-regular fa-calendar-days"></i> Quick Plan</h2><p>Auto-set expiry date</p></div>
+              <div class="card-head-left">
+                <h2>Member Information</h2>
+                <p>Fill in the details to register</p>
+              </div>
             </div>
             <div class="card-body">
-              <div class="plan-grid">
-                <button class="plan-btn" data-months="1">1 Month</button>
-                <button class="plan-btn" data-months="3">3 Months</button>
-                <button class="plan-btn" data-months="6">6 Months</button>
-                <button class="plan-btn" data-months="12">1 Year</button>
+              <div class="photo-uploader">
+                <div class="pu-preview" id="am-pu-img">👤</div>
+                <div class="pu-info">
+                  <p>Profile Photo <span style="color:var(--t4)">(optional)</span></p>
+                  <label class="btn btn-secondary btn-sm" style="cursor:pointer;display:inline-flex;margin-bottom:4px">
+                    <i class="fa-solid fa-camera"></i> Choose Photo
+                    <input type="file" id="am-photo" accept="image/*" style="display:none">
+                  </label><br><span>JPG or PNG, max 2MB</span>
+                </div>
               </div>
-              <p style="font-size:12px;color:var(--t4)">Clicking a plan auto-sets expiry from today.</p>
+              <form id="am-form">
+                <div class="fg">
+                  <label>Full Name <span style="color:var(--red)">*</span></label>
+                  <input type="text" id="am-name" class="fc" placeholder="Enter member's full name" required>
+                </div>
+                <div class="fg">
+                  <label>Phone Number <span style="color:var(--red)">*</span>
+                    <span style="font-size:11px;color:var(--t4);font-weight:400;margin-left:4px">Used as QR identifier —
+                      must be unique</span>
+                  </label>
+                  <input type="tel" id="am-phone" class="fc" placeholder="e.g. 9876543210" required>
+                </div>
+                <div class="form-2col">
+                  <div class="fg"><label>Admission Date</label><input type="date" id="am-adm" class="fc"></div>
+                  <div class="fg"><label>Plan Expiry Date <span style="color:var(--red)">*</span></label><input
+                      type="date" id="am-exp" class="fc" required></div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:8px">
+                  <a href="members.html" class="btn btn-secondary" style="flex:1;justify-content:center">Cancel</a>
+                  <button type="submit" class="btn btn-primary" style="flex:2">
+                    <i class="fa-solid fa-user-plus"></i> Register Member
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-          <div class="card">
-            <div class="card-head"><div class="card-head-left"><h2><i class="fa-solid fa-circle-info"></i> Quick Guide</h2></div></div>
-            <div class="card-body" style="padding-top:8px">
-              <div class="guide-step">
-                <div class="gs-num">1</div>
-                <div class="gs-body"><h4>Phone = QR Code</h4><p>Phone number is encoded in the member's QR code.</p></div>
+
+          <div style="display:flex;flex-direction:column;gap:16px">
+
+            <!-- Admission success card  -->
+            <div class="card" id="am-success-card" style="display:none;border:1.5px solid var(--green-border)">
+              <div class="card-head" style="background:var(--green-bg);border-bottom:1px solid var(--green-border)">
+                <div class="card-head-left">
+                  <h2 style="color:var(--green)"><i class="fa-solid fa-circle-check"></i> Member Registered!</h2>
+                  <p style="color:var(--green)">Download their admission details as a PDF</p>
+                </div>
               </div>
-              <div class="guide-step">
-                <div class="gs-num">2</div>
-                <div class="gs-body"><h4>Plan Expiry</h4><p>Expired members show Inactive and attendance won't be marked.</p></div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+                <!-- Member summary shown here after save -->
+                <div id="am-success-summary"
+                  style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;line-height:1.8">
+                </div>
+                <button class="btn btn-primary" style="width:100%;justify-content:center"
+                  onclick="downloadAdmissionPDF()">
+                  <i class="fa-solid fa-file-pdf"></i> Download Admission PDF
+                </button>
+                <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center"
+                  onclick="document.getElementById('am-success-card').style.display='none'">
+                  <i class="fa-solid fa-xmark"></i> Dismiss
+                </button>
               </div>
-              <div class="guide-step">
-                <div class="gs-num">3</div>
-                <div class="gs-body"><h4>Photos in Cloud</h4><p>Photos are stored securely in Firebase Storage.</p></div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <h2><i class="fa-regular fa-calendar-days"></i> Quick Plan</h2>
+                  <p>Auto-set expiry date</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="plan-grid">
+                  <button class="plan-btn" data-months="1">1 Month</button>
+                  <button class="plan-btn" data-months="3">3 Months</button>
+                  <button class="plan-btn" data-months="6">6 Months</button>
+                  <button class="plan-btn" data-months="12">1 Year</button>
+                </div>
+                <p style="font-size:12px;color:var(--t4)">Clicking a plan auto-sets expiry from today.</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <h2><i class="fa-solid fa-circle-info"></i> Quick Guide</h2>
+                </div>
+              </div>
+              <div class="card-body" style="padding-top:8px">
+                <div class="guide-step">
+                  <div class="gs-num">1</div>
+                  <div class="gs-body">
+                    <h4>Phone = QR Code</h4>
+                    <p>Phone number is encoded in the member's QR code.</p>
+                  </div>
+                </div>
+                <div class="guide-step">
+                  <div class="gs-num">2</div>
+                  <div class="gs-body">
+                    <h4>Plan Expiry</h4>
+                    <p>Expired members show Inactive and attendance won't be marked.</p>
+                  </div>
+                </div>
+                <div class="guide-step">
+                  <div class="gs-num">3</div>
+                  <div class="gs-body">
+                    <h4>Photos in Cloud</h4>
+                    <p>Photos are stored securely in Firebase Storage.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
-</div>
+    </main>
+  </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/cloudinary-config.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="js/cloudinary-config.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/app.js"></script>
 </body>
+
 </html>

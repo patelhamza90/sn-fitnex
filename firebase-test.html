@@ -243,7 +243,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script>
-    // ── UI helpers ──────────────────────────────────────────
+    // ── UI helpers
     function setTest(id, iconCls, icon, detail, extraHTML) {
       var el = document.getElementById(id);
       if (!el) return;
@@ -257,9 +257,9 @@
       }
     }
 
-    // ── Main test runner ────────────────────────────────────
+    // ── Main test runner 
     function runTests() {
-      // Reset
+      
       document.getElementById('fix-section').innerHTML = '';
       document.getElementById('summary').innerHTML = '';
       ['t-config', 't-init', 't-read', 't-write'].forEach(function (id) {
@@ -272,7 +272,7 @@
 
       var failures = [];
 
-      // ── Test 1: Config sanity ──────────────────────────────
+      // ── Test 1: Config sanity 
       var cfg = (typeof firebaseConfig !== 'undefined') ? firebaseConfig : null;
       if (!cfg) {
         setTest('t-config', 'fail', '❌', 'firebaseConfig variable not found — firebase-config.js failed to load');
@@ -296,7 +296,7 @@
       }
       setTest('t-config', 'ok', '✅', 'Config looks real — projectId: ' + cfg.projectId);
 
-      // ── Test 2: Firebase init ──────────────────────────────
+      // ── Test 2: Firebase init 
       if (!window.db) {
         setTest('t-init', 'fail', '❌', 'window.db is null — Firebase did not initialize');
         failures.push('init');
@@ -305,7 +305,7 @@
       }
       setTest('t-init', 'ok', '✅', 'Firebase initialized — window.db is ready');
 
-      // ── Test 3: Firestore read (public) ────────────────────
+      // ── Test 3: Firestore read (public) 
       window.db.collection('members').limit(1).get()
         .then(function () {
           setTest('t-read', 'ok', '✅', 'Firestore read: ALLOWED ✓ — public can read members');

@@ -4,8 +4,6 @@ var CLOUDINARY_CONFIG = {
   uploadPreset: "snfitness-unsigned"
 };
 
-// ─── Do not edit below this line ────────────────────────────
-
 /**
  * Upload a File object to Cloudinary using the unsigned upload API.
  * Returns a Promise that resolves to the secure HTTPS image URL.
@@ -26,8 +24,6 @@ function uploadToCloudinary(file, publicId) {
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset);
 
-    // Use the Firestore document ID as a stable public_id so re-uploads
-    // replace the old image rather than creating duplicates.
     if (publicId) {
       formData.append("public_id", "snfitness-members/" + publicId);
     }

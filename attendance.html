@@ -13,7 +13,6 @@
 
 <body class="att-public-body">
 
-  <!-- Animated background blobs -->
   <div class="att-bg">
     <div class="att-blob att-blob-1"></div>
     <div class="att-blob att-blob-2"></div>
@@ -21,7 +20,7 @@
 
   <div class="att-root">
 
-    <!-- ── Header ─────────────────────────────────────── -->
+    <!--  Header -->
     <header class="att-header">
       <img src="logo.jpeg" class="att-logo" alt="SN.Fitnex" onerror="this.style.display='none'">
       <div>
@@ -30,7 +29,7 @@
       </div>
     </header>
 
-    <!-- ── Input card (shown first) ───────────────────── -->
+    <!--  Input card -->
     <div class="att-card" id="att-input-card">
       <div class="att-card-icon">
         <i class="fa-solid fa-person-walking-arrow-right"></i>
@@ -55,10 +54,10 @@
       </form>
     </div>
 
-    <!-- ── Result card (shown after lookup) ───────────── -->
+    <!-- Result card -->
     <div class="att-card att-result-card" id="att-result-card" style="display:none">
 
-      <!-- SUCCESS: Active member, attendance marked -->
+      <!-- Active member, attendance marked -->
       <div id="att-result-success" style="display:none">
         <div class="att-result-icon att-result-icon--success">
           <i class="fa-solid fa-circle-check"></i>
@@ -71,7 +70,7 @@
         <div class="att-member-details" id="att-member-details"></div>
       </div>
 
-      <!-- ALREADY: Already checked in today -->
+      <!-- Already checked in today -->
       <div id="att-result-already" style="display:none">
         <div class="att-result-icon att-result-icon--already">
           <i class="fa-solid fa-clock-rotate-left"></i>
@@ -84,7 +83,7 @@
         <div class="att-member-details" id="att-member-details-2"></div>
       </div>
 
-      <!-- EXPIRED: Plan expired -->
+      <!-- Plan expired -->
       <div id="att-result-expired" style="display:none">
         <div class="att-result-icon att-result-icon--expired">
           <i class="fa-solid fa-triangle-exclamation"></i>
@@ -118,17 +117,16 @@
       </button>
     </div>
 
-    <!-- ── Footer ──────────────────────────────────────── -->
+    <!--  Footer -->
     <footer class="att-footer">
       Powered by SN.Fitnex Management System
     </footer>
 
   </div>
 
-  <!-- Firebase Compat SDK — same config as admin pages, reuses window.db -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <!-- Reuse the same firebase-config.js — sets window.db which attendance-public.js uses -->
+  
   <script src="js/firebase-config.js"></script>
   <script src="js/attendance-public.js"></script>
 </body>

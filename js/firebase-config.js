@@ -8,28 +8,10 @@ const firebaseConfig = {
   measurementId: "G-57G2P4WGM2"
 };
 
-// Initialize Firebase (only once — guard against double-init)
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Firestore — with long-polling enabled.
-//
-//  WHY THIS IS REQUIRED ON NETLIFY:
-//  Firestore uses gRPC/WebSocket as its primary transport.
-//  Netlify's edge network (and many other CDN hosts) blocks or
-//  interferes with WebSocket upgrade requests to third-party
-//  servers. Without this setting, Firestore's WebSocket
-//  connection silently hangs — db.collection().get() is called
-//  but NEVER resolves or rejects. The page shows "Loading..."
-//  forever with no error in the console.
-//
-//  experimentalAutoDetectLongPolling: true  tells Firestore to
-//  automatically detect when WebSocket is unavailable and fall
-//  back to HTTP long-polling, which works on all CDN hosts
-//  including Netlify, Vercel, GitHub Pages, etc.
-// ─────────────────────────────────────────────────────────────
 window.db = firebase.firestore();
 window.db.settings({
   experimentalAutoDetectLongPolling: true,
@@ -44,4 +26,4 @@ if (typeof firebase.auth === "function") {
   window.auth = null;
 }
 
-console.log("✅ Firebase initialized — Auth:", window.auth ? "yes" : "no (public page)", "| Firestore: long-polling enabled");
+console.log("Firebase initialized — Auth:", window.auth ? "yes" : "no (public page)", "| Firestore: long-polling enabled");
