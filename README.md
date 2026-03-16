@@ -31,6 +31,7 @@ The system is designed so that only the **admin can access the dashboard**, whil
 ---
 
 # Project Structure
+```
 snfitness/
 │
 ├── index.html
@@ -43,9 +44,10 @@ snfitness/
 ├── logo.jpeg
 │
 └── js/
-├── firebase-config.js
-├── cloudinary-config.js
-└── app.js
+    ├── firebase-config.js
+    ├── cloudinary-config.js
+    └── app.js
+```
 
 # System Flow
 

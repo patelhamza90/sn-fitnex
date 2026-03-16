@@ -362,7 +362,7 @@ function renderAlerts(containerId, members) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  LOGIN PAGE
+     LOGIN PAGE
 ═══════════════════════════════════════════════════════════ */
 
 function initLogin() {
@@ -493,7 +493,7 @@ function initLogin() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  DASHBOARD PAGE
+     DASHBOARD PAGE
 ═══════════════════════════════════════════════════════════ */
 
 function initDashboard() {
@@ -584,7 +584,7 @@ function initDashboard() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  MEMBERS PAGE
+     MEMBERS PAGE
 ═══════════════════════════════════════════════════════════ */
 
 var _allMembers = [];
@@ -875,7 +875,7 @@ window.openQRModal = function (id) {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  ADD MEMBER PAGE
+     ADD MEMBER PAGE
 ═══════════════════════════════════════════════════════════ */
 
 // Holds the last successfully added member so the PDF function can read it
@@ -974,7 +974,7 @@ function initAddMember() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  SCANNER PAGE
+     SCANNER PAGE
    Engine priority:
      1. BarcodeDetector API  — native browser, hardware-accelerated
      2. ZXing-js canvas loop — most reliable cross-browser JS decoder
@@ -984,7 +984,7 @@ function initAddMember() {
    unreliable decodeFromVideoElement stream API).
 ═══════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════
-   ██████  SCANNER PAGE  (Admin Attendance Dashboard)
+     SCANNER PAGE  (Admin Attendance Dashboard)
    The scanner page no longer uses a camera. Instead:
    - Members use attendance.html (public, no login) via the gym QR code
    - This page shows the admin the live today's log + manual override
@@ -1201,7 +1201,7 @@ function updateTodayCountFromList(n) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  REPORTS PAGE
+     REPORTS PAGE
 ═══════════════════════════════════════════════════════════ */
 
 function initReports() {
@@ -1317,7 +1317,7 @@ function initReports() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  PERFORMANCE TABLE ENGINE
+     PERFORMANCE TABLE ENGINE
    search · status filter · pagination · row checkboxes
    All functions are prefixed rep* to avoid name collisions.
 ═══════════════════════════════════════════════════════════ */
@@ -1892,7 +1892,7 @@ window.downloadAdmissionPDF = function () {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   ██████  ADMISSION REPORT BY DATE RANGE
+     ADMISSION REPORT BY DATE RANGE
    Filters the already-loaded _reportData.members array by
    admissionDate (client-side, no extra Firestore query).
    Downloads as CSV or XLS.
