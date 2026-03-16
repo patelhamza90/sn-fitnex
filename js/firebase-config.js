@@ -1,23 +1,11 @@
-// ============================================================
-//  SN.Fitness — Firebase Configuration (Compat SDK)
-//  ✅ Works for BOTH admin pages (Auth + Firestore)
-//  ✅ Works for attendance.html (Firestore only, no Auth)
-//
-//  HOW TO GET YOUR CONFIG:
-//  1. Go to https://console.firebase.google.com
-//  2. Open your project → Project Settings (gear icon)
-//  3. Scroll to "Your apps" → click the Web app (</>)
-//  4. Copy the firebaseConfig values below
-// ============================================================
-
-// ⚠️ REPLACE ALL VALUES BELOW WITH YOUR ACTUAL FIREBASE CONFIG
-var firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId:             "YOUR_APP_ID"
-  // storageBucket intentionally omitted — photos use Cloudinary
+const firebaseConfig = {
+  apiKey: "AIzaSyAYwHjHLJ31fiHY7ehYSHD5sJfbghtp39Y",
+  authDomain: "snfitness-app.firebaseapp.com",
+  projectId: "snfitness-app",
+  storageBucket: "snfitness-app.firebasestorage.app",
+  messagingSenderId: "1000043135203",
+  appId: "1:1000043135203:web:61fff4d5ebc327ce5f45d6",
+  measurementId: "G-57G2P4WGM2"
 };
 
 // Initialize Firebase (only once — guard against double-init)
