@@ -74,6 +74,3 @@ snfitness/
 • If phone number **not found** → member not registered
 
 ---
-
-
-Live Link : https://sn-fitnex.vercel.app
